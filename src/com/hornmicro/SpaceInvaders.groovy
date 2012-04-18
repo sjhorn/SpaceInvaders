@@ -28,14 +28,16 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     Shell shell
     Timeline timeline, vaderTimeline
     int vaderToggle = 0
-    
+    int startingLeft = -1
+    int sizeMultiply = 6
     
     int left = 1, vaderLeft = 0
     Point bullet = new Point(0, -20)
     
     void setLeft(int left) {
         this.left = left
-        shell.display.asyncExec { shell.redraw() }
+        if(!shell.isDisposed())
+            shell.display.asyncExec { !shell.isDisposed() && shell.redraw() }
     }
     
     void paintControl(PaintEvent pe) {
@@ -54,18 +56,22 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         }
         if(bullet.y != -20) {
             gc.setBackground(shell.display.getSystemColor(SWT.COLOR_GRAY))
-            gc.fillRectangle(bullet.x, bullet.y-20, 10, 20)
+            gc.fillRectangle(bullet.x, bullet.y-(20*sizeMultiply), 10*sizeMultiply, 20*sizeMultiply)
         }
          
         gc.setAlpha(255)
-        gc.drawImage(vaderToggle ? vader1Left : vader1Right,
-            0, 0, vader1Left.width, vader1Left.height,
-            10, 10, vader1Left.width * 2, vader1Left.height * 2)
-        
+        if(startingLeft == -1) {
+            startingLeft = shell.display.getBounds().width / 2 - 3 * vader1Left.width*sizeMultiply*2
+        }
+        (0..5).each {
+            gc.drawImage(vaderToggle ? vader1Left : vader1Right,
+                0, 0, vader1Left.width, vader1Left.height,
+                startingLeft + (it*vader1Left.width*sizeMultiply*2), 10, vader1Left.width * sizeMultiply, vader1Left.height * sizeMultiply)
+        }
         
         gc.drawImage(spacecraft, 
             0, 0, spacecraft.width, spacecraft.height, 
-            left, shell.display.bounds.height - 60, spacecraft.width * 2, spacecraft.height * 2)
+            left, shell.display.bounds.height - spacecraft.height * sizeMultiply, spacecraft.width * sizeMultiply, spacecraft.height * sizeMultiply)
     }
     
     void widgetDisposed(DisposeEvent e) {
@@ -87,13 +93,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                    break
                case 32:
                    if(bullet.y == -20) {
-                       newBullet = new Point(left + spacecraft.width - 5, screen.height - spacecraft.height*2)
+                       newBullet = new Point((left + spacecraft.width*sizeMultiply/2) as int, screen.height - spacecraft.height*sizeMultiply)
                        Timeline bulletTimeLine = new Timeline(this)
                        bulletTimeLine.addPropertyToInterpolate("bullet", newBullet, new Point(newBullet.x, -20))
                        bulletTimeLine.setDuration(screen.height)
                        bulletTimeLine.addCallback(new TimelineCallback() {
                            void onTimelinePulse(float arg0, float arg1) {
-                               shell.display.asyncExec { shell.redraw() }
+                               if(!shell.isDisposed())
+                                   shell.display.asyncExec { !shell.isDisposed() && shell.redraw() }
                            }
                            void onTimelineStateChanged(TimelineState arg0, TimelineState arg1, float arg2, float arg3) {
                            }
@@ -145,16 +152,20 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             @Override
             public void onTimelinePulse(float durationFraction,
                     float timelinePosition) {
-                shell.display.asyncExec { shell.redraw() }
+                if(!shell.isDisposed())
+                    shell.display.asyncExec { !shell.isDisposed() && shell.redraw() }
             }
         })
         vaderTimeline.playLoop(RepeatBehavior.REVERSE)
+        
+        
         
         shell.open()
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep()
         }
+        vaderTimeline.abort()
         display.dispose()
     }
     
