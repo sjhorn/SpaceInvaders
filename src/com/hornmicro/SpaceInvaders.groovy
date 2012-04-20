@@ -43,7 +43,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     void paintControl(PaintEvent pe) {
         GC gc = pe.gc
         gc.setAdvanced(true)
-        gc.setAntialias(SWT.ON)
+        gc.setAntialias(SWT.OFF)
         
 //        gc.setAlpha(200)
 //        gc.setBackground(shell.display.getSystemColor(SWT.COLOR_BLACK))
@@ -56,7 +56,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         }
         if(bullet.y != -20) {
             gc.setBackground(shell.display.getSystemColor(SWT.COLOR_GRAY))
-            gc.fillRectangle(bullet.x, bullet.y-(20*sizeMultiply), 10*sizeMultiply, 20*sizeMultiply)
+            gc.fillRectangle(bullet.x, bullet.y-(20*sizeMultiply), 4*sizeMultiply, 10*sizeMultiply)
         }
          
         gc.setAlpha(255)
@@ -93,7 +93,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                    break
                case 32:
                    if(bullet.y == -20) {
-                       newBullet = new Point((left + spacecraft.width*sizeMultiply/2) as int, screen.height - spacecraft.height*sizeMultiply)
+                       newBullet = new Point((left + spacecraft.width*sizeMultiply/2 - 2*sizeMultiply) as int, screen.height - spacecraft.height*sizeMultiply)
                        Timeline bulletTimeLine = new Timeline(this)
                        bulletTimeLine.addPropertyToInterpolate("bullet", newBullet, new Point(newBullet.x, -20))
                        bulletTimeLine.setDuration(screen.height)
