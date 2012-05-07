@@ -1,177 +1,184 @@
 package com.hornmicro
 
+
 import org.eclipse.swt.SWT
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.PaintListener
 import org.eclipse.swt.graphics.GC
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.graphics.Point
 import org.eclipse.swt.graphics.Rectangle
-import org.eclipse.swt.internal.cocoa.NSColor
-import org.eclipse.swt.widgets.Display
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener
-import org.eclipse.swt.widgets.Shell
-import org.pushingpixels.trident.Timeline
-import org.pushingpixels.trident.Timeline.RepeatBehavior;
-import org.pushingpixels.trident.Timeline.TimelineState
-import org.pushingpixels.trident.callback.TimelineCallback
-import org.pushingpixels.trident.callback.TimelineCallbackAdapter
-import org.pushingpixels.trident.interpolator.KeyFrames
-import org.pushingpixels.trident.interpolator.KeyTimes
-import org.pushingpixels.trident.interpolator.KeyValues
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
-class SpaceInvaders implements PaintListener, DisposeListener, Listener {
-    Image spacecraft, vader1Left, vader1Right
+class Sprite {
+    Rectangle[] imageOffsets
+    Point offset
+    Integer state
+    Closure nextState
+    Sprite cloneToOffset(x,y) {
+        return new Sprite(imageOffsets:this.imageOffsets, 
+            state: 0, 
+            nextState: this.nextState,
+            offset:new Point(x , y))
+    } 
+}
+
+class SpaceInvaders implements PaintListener {
+    Display display
+    Image spriteSheet
+    List sprites
     Shell shell
-    Timeline timeline, vaderTimeline
-    int vaderToggle = 0
-    int startingLeft = -1
-    int sizeMultiply = 6
+    Long lastTick
+    Point vaderOffset = new Point(10, 0)
+    Boolean vaderForward = true
     
-    int left = 1, vaderLeft = 0
-    Point bullet = new Point(0, -20)
+    SpaceInvaders(Display display) {
+        this.display = new Display()
+        spriteSheet = new Image(display, "SpriteSheet.png")
+        def enemy1 = new Sprite(
+            imageOffsets: [new Rectangle(0,0,32,20), new Rectangle(32,0,32,20)],
+            offset: new Point(0, 30),
+            state: 0,
+            nextState: {
+                delegate.state = delegate.state ? 0 : 1
+            }
+        )
+        def enemy2 = new Sprite(
+            imageOffsets: [new Rectangle(64,0,32,20), new Rectangle(96,0,32,20)],
+            offset: new Point(0, 60),
+            state: 0,
+            nextState: enemy1.nextState
+        )
+        def enemy3 = new Sprite(
+            imageOffsets: [new Rectangle(128,0,32,20), new Rectangle(160,0,32,20)],
+            offset: new Point(0, 60),
+            state: 0,
+            nextState: enemy1.nextState
+        )
+        def enemy4 = new Sprite(
+            imageOffsets: [new Rectangle(192,0,32,20), new Rectangle(224,0,32,20)],
+            offset: new Point(0, 60),
+            state: 0,
+            nextState: enemy1.nextState
+        )
+        def enemy5 = new Sprite(
+            imageOffsets: [new Rectangle(256,0,32,20), new Rectangle(288,0,32,20)],
+            offset: new Point(0, 60),
+            state: 0,
+            nextState: enemy1.nextState
+        )
+        def enemy6 = new Sprite(
+            imageOffsets: [new Rectangle(320,0,32,20), new Rectangle(352,0,32,20)],
+            offset: new Point(0, 60),
+            state: 0,
+            nextState: enemy1.nextState
+        )
+        def enemy = [enemy1, enemy2, enemy3, enemy4, enemy5, enemy6]
+        
+        // Load Sprites
+        sprites = []
+        (1..6).each { i ->
+            (0..5).each {
+                sprites << enemy[i-1].cloneToOffset(it*64, 30 * i)
+            } 
+        }
+        
+    }
     
-    void setLeft(int left) {
-        this.left = left
-        if(!shell.isDisposed())
-            shell.display.asyncExec { !shell.isDisposed() && shell.redraw() }
+    void updateModel() {
+        /*
+            run AI
+            move enemies
+            resolve collisions
+         */
+        
+        Long diff = System.nanoTime() - lastTick
+        if(diff > 1000000000 ) {
+            sprites.each { Sprite sprite ->
+                if(sprite.nextState) {
+                    sprite.nextState.delegate = sprite
+                    sprite.nextState()
+                }
+            }
+            if(vaderForward) {
+                
+                if(vaderOffset.x > 100) {
+                    vaderOffset.y += 15
+                    vaderForward = false
+                } else {
+                    vaderOffset.x += 10
+                }   
+            } else {
+                if(vaderOffset.x < 20) {
+                    vaderOffset.y += 15
+                    vaderForward = true
+                } else {
+                    vaderOffset.x -= 10
+                }
+            }
+            lastTick = System.nanoTime()
+        }
     }
     
     void paintControl(PaintEvent pe) {
-        GC gc = pe.gc
-        gc.setAdvanced(true)
-        gc.setAntialias(SWT.OFF)
-        
-//        gc.setAlpha(200)
-//        gc.setBackground(shell.display.getSystemColor(SWT.COLOR_BLACK))
-//        gc.fillRectangle(shell.getClientArea())
-        
-        if(!spacecraft) {
-            spacecraft = new Image(shell.display, "spacecraft.png")
-            vader1Left = new Image(shell.display, "vader1_left.png")
-            vader1Right = new Image(shell.display, "vader1_right.png")
-        }
-        if(bullet.y != -20) {
-            gc.setBackground(shell.display.getSystemColor(SWT.COLOR_GRAY))
-            gc.fillRectangle(bullet.x, bullet.y-(20*sizeMultiply), 4*sizeMultiply, 10*sizeMultiply)
-        }
-         
-        gc.setAlpha(255)
-        if(startingLeft == -1) {
-            startingLeft = shell.display.getBounds().width / 2 - 3 * vader1Left.width*sizeMultiply*2
-        }
-        (0..5).each {
-            gc.drawImage(vaderToggle ? vader1Left : vader1Right,
-                0, 0, vader1Left.width, vader1Left.height,
-                startingLeft + (it*vader1Left.width*sizeMultiply*2), 10, vader1Left.width * sizeMultiply, vader1Left.height * sizeMultiply)
-        }
-        
-        gc.drawImage(spacecraft, 
-            0, 0, spacecraft.width, spacecraft.height, 
-            left, shell.display.bounds.height - spacecraft.height * sizeMultiply, spacecraft.width * sizeMultiply, spacecraft.height * sizeMultiply)
+        if(shell && !shell.isDisposed())
+            draw(shell)
     }
     
-    void widgetDisposed(DisposeEvent e) {
-        spacecraft?.dispose()
-    }
-    
-    int lastkey
-    void handleEvent(Event event) {
-        if(event.type == SWT.KeyDown && lastkey != event.keyCode) {
-            Rectangle screen = shell.display.getBounds()
-            int newLoc
-            Point newBullet 
-            switch(event.keyCode) {
-               case 16777220:
-                   newLoc = screen.width - spacecraft.width * 2
-                   break
-               case 16777219:
-                   newLoc = 1
-                   break
-               case 32:
-                   if(bullet.y == -20) {
-                       newBullet = new Point((left + spacecraft.width*sizeMultiply/2 - 2*sizeMultiply) as int, screen.height - spacecraft.height*sizeMultiply)
-                       Timeline bulletTimeLine = new Timeline(this)
-                       bulletTimeLine.addPropertyToInterpolate("bullet", newBullet, new Point(newBullet.x, -20))
-                       bulletTimeLine.setDuration(screen.height)
-                       bulletTimeLine.addCallback(new TimelineCallback() {
-                           void onTimelinePulse(float arg0, float arg1) {
-                               if(!shell.isDisposed())
-                                   shell.display.asyncExec { !shell.isDisposed() && shell.redraw() }
-                           }
-                           void onTimelineStateChanged(TimelineState arg0, TimelineState arg1, float arg2, float arg3) {
-                           }
-                       })
-                       bulletTimeLine.play()
-                   }
-                   return
-                   break;
-               default:
-                   println event.keyCode
-                   return
-            }
-            timeline?.cancel()
-            timeline = new Timeline(this)
-            
-            timeline.setDuration( (Math.abs(newLoc - left) / 2) as int)
-            timeline.addPropertyToInterpolate("left", left, newLoc)
-            timeline.play()
-            
-            
-            lastkey = event.keyCode
-        } else if (event.type == SWT.KeyUp) {
-            timeline?.cancel()
-            lastkey = 0
+    void draw(Shell shell) {
+        if(!shell || shell.isDisposed()) return
+        GC gc = new GC(shell)
+        gc.setInterpolation(SWT.NONE)
+        
+        gc.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
+        gc.fillRectangle(shell.clientArea)
+        
+        sprites.each { Sprite sprite ->
+            Rectangle ioff = sprite.imageOffsets[sprite.state]
+            Point off = sprite.offset
+            gc.drawImage(spriteSheet, 
+                ioff.x, ioff.y, ioff.width, ioff.height,
+                off.x + vaderOffset.x, off.y + vaderOffset.y, ioff.width, ioff.height)
         }
+        gc.dispose()
+        display.update()
+        
     }
     
-    void run() {
-        Display.appName = "Mac Vaders" 
-        Display display = new Display()
+    void mainLoop() {
+        /*
+        while( user doesn't exit )
+            check for user input
+            update model
+            draw graphics
+            play sounds
+        end while
+        */
         
-        display.addFilter(SWT.KeyDown, this)
-        display.addFilter(SWT.KeyUp, this)
-        Rectangle screen = display.getBounds()
         
-        shell = new Shell(display, SWT.NO_TRIM | SWT.NO_BACKGROUND | SWT.ON_TOP | SWT.DOUBLE_BUFFERED)
-        shell.setBounds(1,25, screen.width, screen.height-25)
+        shell = new Shell(display)
         shell.addPaintListener(this)
-        shell.addDisposeListener(this)
-        shell.window.setOpaque(false);
-        shell.window.setBackgroundColor(NSColor.clearColor())
+        shell.setLayout(new GridLayout(1, false))
+        
 
-        KeyValues vaderValues = KeyValues.create(1, 1, 0, 0)
-        KeyTimes vaderTimes = new KeyTimes(0.0f, 0.49f, 0.5f,  1.0f)        
-        vaderTimeline = new Timeline(this)
-        vaderTimeline.addPropertyToInterpolate("vaderToggle", new KeyFrames(vaderValues, vaderTimes))
-        vaderTimeline.setDuration(1000)
-        vaderTimeline.addCallback(new TimelineCallbackAdapter() {
-            @Override
-            public void onTimelinePulse(float durationFraction,
-                    float timelinePosition) {
-                if(!shell.isDisposed())
-                    shell.display.asyncExec { !shell.isDisposed() && shell.redraw() }
-            }
-        })
-        vaderTimeline.playLoop(RepeatBehavior.REVERSE)
-        
-        
-        
+        shell.pack()
+        shell.setSize(400,400)
         shell.open()
+        lastTick = System.nanoTime()
         while (!shell.isDisposed()) {
-            if (!display.readAndDispatch())
-                display.sleep()
+            display.readAndDispatch()
+            updateModel()
+            draw(shell)
+            Thread.yield()
         }
-        vaderTimeline.abort()
         display.dispose()
+        
     }
-    
     
     static main(args) {
-        new SpaceInvaders().run()
+        new SpaceInvaders().mainLoop()
     }
 
 }
