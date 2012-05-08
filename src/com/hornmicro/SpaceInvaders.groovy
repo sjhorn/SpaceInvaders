@@ -15,14 +15,8 @@ import org.eclipse.swt.widgets.Shell;
 class Sprite {
     Rectangle[] imageOffsets
     Point offset
-    Integer state
-    Closure nextState
-    Sprite cloneToOffset(x,y) {
-        return new Sprite(imageOffsets:this.imageOffsets, 
-            state: 0, 
-            nextState: this.nextState,
-            offset:new Point(x , y))
-    } 
+    Integer state = 0
+    Closure nextState 
 }
 
 class SpaceInvaders implements PaintListener {
@@ -37,51 +31,20 @@ class SpaceInvaders implements PaintListener {
     SpaceInvaders(Display display) {
         this.display = new Display()
         spriteSheet = new Image(display, "SpriteSheet.png")
-        def enemy1 = new Sprite(
-            imageOffsets: [new Rectangle(0,0,32,20), new Rectangle(32,0,32,20)],
-            offset: new Point(0, 30),
-            state: 0,
-            nextState: {
-                delegate.state = delegate.state ? 0 : 1
-            }
-        )
-        def enemy2 = new Sprite(
-            imageOffsets: [new Rectangle(64,0,32,20), new Rectangle(96,0,32,20)],
-            offset: new Point(0, 60),
-            state: 0,
-            nextState: enemy1.nextState
-        )
-        def enemy3 = new Sprite(
-            imageOffsets: [new Rectangle(128,0,32,20), new Rectangle(160,0,32,20)],
-            offset: new Point(0, 60),
-            state: 0,
-            nextState: enemy1.nextState
-        )
-        def enemy4 = new Sprite(
-            imageOffsets: [new Rectangle(192,0,32,20), new Rectangle(224,0,32,20)],
-            offset: new Point(0, 60),
-            state: 0,
-            nextState: enemy1.nextState
-        )
-        def enemy5 = new Sprite(
-            imageOffsets: [new Rectangle(256,0,32,20), new Rectangle(288,0,32,20)],
-            offset: new Point(0, 60),
-            state: 0,
-            nextState: enemy1.nextState
-        )
-        def enemy6 = new Sprite(
-            imageOffsets: [new Rectangle(320,0,32,20), new Rectangle(352,0,32,20)],
-            offset: new Point(0, 60),
-            state: 0,
-            nextState: enemy1.nextState
-        )
-        def enemy = [enemy1, enemy2, enemy3, enemy4, enemy5, enemy6]
+        def enemyNextState = {
+            delegate.state = delegate.state ? 0 : 1
+        }
         
         // Load Sprites
         sprites = []
-        (1..6).each { i ->
-            (0..5).each {
-                sprites << enemy[i-1].cloneToOffset(it*64, 30 * i)
+        (0..5).each { row ->
+            (0..5).each { col ->
+                def item = row * 6 + col
+                sprites << new Sprite(
+                    imageOffsets:[ new Rectangle(row * 64,0,32,20), new Rectangle(row * 64 + 32,0,32,20) ], 
+                    offset: new Point(col * 64, row * 30), 
+                    nextState: enemyNextState
+                )
             } 
         }
         
@@ -95,7 +58,7 @@ class SpaceInvaders implements PaintListener {
          */
         
         Long diff = System.nanoTime() - lastTick
-        if(diff > 1000000000 ) {
+        if(diff > 100000000  && vaderOffset.y < 115) {
             sprites.each { Sprite sprite ->
                 if(sprite.nextState) {
                     sprite.nextState.delegate = sprite
