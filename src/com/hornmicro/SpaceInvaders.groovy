@@ -23,6 +23,7 @@ class SpaceInvaders implements PaintListener {
     Display display
     Image spriteSheet
     List sprites
+    List explosions
     Shell shell
     Long lastTick
     Point vaderOffset = new Point(10, 0)
@@ -35,7 +36,7 @@ class SpaceInvaders implements PaintListener {
             delegate.state = delegate.state ? 0 : 1
         }
         
-        // Load Sprites
+        // Load Invader Sprites
         sprites = []
         (0..5).each { row ->
             (0..5).each { col ->
@@ -48,6 +49,45 @@ class SpaceInvaders implements PaintListener {
             } 
         }
         
+        // Load explosions
+        def explosionNextState = { -> 
+            delegate.state += 1
+            if(delegate.state == delegate.imageOffsets.size()) {
+                delegate.state = 0   
+            }
+        }
+        sprites += [ 
+            new Sprite(
+                imageOffsets: [
+                    new Rectangle( 0, 20, 32, 20),
+                    new Rectangle( 32, 20, 32, 20),
+                    new Rectangle( 64, 20, 32, 20),
+                    new Rectangle( 96, 20, 32, 20)
+                ],
+                offset: new Point(0,200),
+                nextState: explosionNextState
+            ),
+            new Sprite(
+                imageOffsets: [
+                   //new Rectangle( 0, 40, 32, 20),
+                   new Rectangle( 32, 40, 32, 20),
+                   new Rectangle( 64, 40, 32, 20)
+                ],
+               offset: new Point(0,230),
+               nextState: explosionNextState
+            ),
+            new Sprite(
+                imageOffsets: [
+                   //new Rectangle( 0, 60, 32, 20),
+                   new Rectangle( 32, 60, 32, 20),
+                   new Rectangle( 64, 60, 32, 20)
+                ],
+                offset: new Point(0,260),
+                nextState: explosionNextState
+            )
+        ]
+        
+        
     }
     
     void updateModel() {
@@ -58,7 +98,7 @@ class SpaceInvaders implements PaintListener {
          */
         
         Long diff = System.nanoTime() - lastTick
-        if(diff > 100000000  && vaderOffset.y < 115) {
+        if(diff > 500000000  && vaderOffset.y < 115) {
             sprites.each { Sprite sprite ->
                 if(sprite.nextState) {
                     sprite.nextState.delegate = sprite
