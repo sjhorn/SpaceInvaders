@@ -43,8 +43,9 @@ class SpaceInvaders implements PaintListener, Listener {
     Boolean vaderForward = true
     
     SpaceInvaders(Display display) {
+        Display.appName = "Space Invaders"
         this.display = new Display()
-        spriteSheet = new Image(display, "SpriteSheet.png")
+        spriteSheet = new Image(display, "gfx/SpriteSheet.png")
         
         // Load Ship
         ship = new Sprite(
@@ -229,12 +230,13 @@ class SpaceInvaders implements PaintListener, Listener {
             play sounds
         end while
         */
-        Display.appName = "Space Invaders"
+        
         display.addFilter(SWT.KeyDown, this)
         display.addFilter(SWT.KeyUp, this)
 
         
         shell = new Shell(display)
+        shell.setImage(new Image(Display.default, "gfx/SpaceInvaders.png"))
         shell.addPaintListener(this)
         shell.setLayout(new GridLayout(1, false))
         
