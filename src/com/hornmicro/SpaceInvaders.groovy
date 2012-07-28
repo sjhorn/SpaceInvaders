@@ -38,7 +38,7 @@ class SpaceInvaders implements PaintListener, Listener {
     
     List explosions
     Shell shell
-    Long lastTick
+    Long lastTick, shipTick
     Point vaderOffset = new Point(10, 0)
     Boolean vaderForward = true
     
@@ -120,14 +120,15 @@ class SpaceInvaders implements PaintListener, Listener {
          */
         
         Long diff = System.nanoTime() - lastTick
-        if(diff > 10000000) {
+        Long shipDiff = System.nanoTime() - shipTick
+        if(shipDiff > 10000000) {
             if(ship.state == 1 && ship.offset.x < 400) {
-                ship.offset.x += 2
+                ship.offset.x += 5
             } else if (ship.state == 2 && ship.offset.x > 0) {
-                ship.offset.x -= 2
+                ship.offset.x -= 5
             }
+            shipTick = System.nanoTime()
         }
-        
         if(diff > 500000000  && vaderOffset.y < 115) {
             sprites.each { Sprite sprite ->
                 if(sprite.nextState) {
@@ -168,21 +169,34 @@ class SpaceInvaders implements PaintListener, Listener {
             draw(shell)
     }
     
+    def rightArrowDown = false
+    def leftArrowDown = false
     void handleEvent(Event event) {
         if(event.type == SWT.KeyDown) {
             switch(event.keyCode) {
-               case 16777220: // Right Key
+               case SWT.ARROW_RIGHT: // Right Key
                    ship.state = 1
+                   rightArrowDown = true
                    break
-               case 16777219: // Left Key
+               case SWT.ARROW_LEFT: // Left Key
                    ship.state = 2
+                   leftArrowDown = true
                    break
-               case 32: // Space Key
+               case SWT.SPACE: // Space Key
                    break;
             }
-        } else if (event.type) {
-            ship.state = 0
-        }
+        } 
+        else if (event.type == SWT.KeyUp) {
+            switch(event.keyCode) {
+                case SWT.ARROW_RIGHT: // Right Key
+                    rightArrowDown = false
+                    break
+                case SWT.ARROW_LEFT: // Left Key
+                    leftArrowDown = false
+                    break
+             }
+            ship.state = rightArrowDown ? 1 : leftArrowDown ? 2 : 0
+        } 
     }
     
     
@@ -194,7 +208,6 @@ class SpaceInvaders implements PaintListener, Listener {
         
         gc.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
         gc.fillRectangle(shell.clientArea)
-        
         
         invaders.each { Sprite sprite ->
             sprite.draw(spriteSheet, gc)
@@ -227,9 +240,9 @@ class SpaceInvaders implements PaintListener, Listener {
         
 
         shell.pack()
-        shell.setSize(400,400)
+        shell.setSize(430,400)
         shell.open()
-        lastTick = System.nanoTime()
+        lastTick = shipTick = System.nanoTime()
         while (!shell.isDisposed()) {
             display.readAndDispatch()
             updateModel()
