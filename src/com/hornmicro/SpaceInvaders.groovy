@@ -2,16 +2,20 @@
 package com.hornmicro
 
 
+import java.util.concurrent.TimeUnit
+
 import org.eclipse.swt.SWT
-import org.eclipse.swt.widgets.Event
 import org.eclipse.swt.events.PaintEvent
 import org.eclipse.swt.events.PaintListener
 import org.eclipse.swt.graphics.GC
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.graphics.Point
 import org.eclipse.swt.graphics.Rectangle
-import org.eclipse.swt.layout.GridLayout
+import org.eclipse.swt.layout.FillLayout
+import org.eclipse.swt.widgets.Canvas
+import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Display
+import org.eclipse.swt.widgets.Event
 import org.eclipse.swt.widgets.Listener
 import org.eclipse.swt.widgets.Shell
 
@@ -68,7 +72,7 @@ class SpaceInvaders implements PaintListener, Listener {
                 )
             } 
         }
-        sprites += invaders
+        sprites.addAll(invaders)
         
         // Load explosions
         /*
@@ -120,9 +124,9 @@ class SpaceInvaders implements PaintListener, Listener {
             resolve collisions
          */
         
-        Long diff = System.nanoTime() - lastTick
+        // Update Ship position ~ 10ms
         Long shipDiff = System.nanoTime() - shipTick
-        if(shipDiff > 10000000) {
+        if(shipDiff > 15000000) {
             if(ship.state == 1 && ship.offset.x < 400) {
                 ship.offset.x += 5
             } else if (ship.state == 2 && ship.offset.x > 0) {
@@ -130,6 +134,9 @@ class SpaceInvaders implements PaintListener, Listener {
             }
             shipTick = System.nanoTime()
         }
+        
+        // Update invader position ~ 500ms
+        Long diff = System.nanoTime() - lastTick
         if(diff > 500000000  && vaderOffset.y < 115) {
             sprites.each { Sprite sprite ->
                 if(sprite.nextState) {
@@ -202,23 +209,19 @@ class SpaceInvaders implements PaintListener, Listener {
     
     
     
-    void draw(Shell shell) {
-        if(!shell || shell.isDisposed()) return
-        GC gc = new GC(shell)
+    void draw(Composite comp) {
+        if(!comp || comp.isDisposed()) return
+        GC gc = new GC(comp)
         gc.setInterpolation(SWT.NONE)
         
-        gc.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
-        gc.fillRectangle(shell.clientArea)
+        gc.fillRectangle(comp.clientArea)
         
         invaders.each { Sprite sprite ->
             sprite.draw(spriteSheet, gc)
         }
         ship.draw(spriteSheet, gc)
         
-        
         gc.dispose()
-        display.update()
-        
     }
     
     void mainLoop() {
@@ -231,25 +234,35 @@ class SpaceInvaders implements PaintListener, Listener {
         end while
         */
         
+        
+        
         display.addFilter(SWT.KeyDown, this)
         display.addFilter(SWT.KeyUp, this)
 
         
         shell = new Shell(display)
+        shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
         shell.setImage(new Image(Display.default, "gfx/SpaceInvaders.png"))
-        shell.addPaintListener(this)
-        shell.setLayout(new GridLayout(1, false))
+
+        Canvas canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED)        
+        canvas.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
+        canvas.addPaintListener(this)
+        shell.setLayout(new FillLayout())
         
 
-        shell.pack()
-        shell.setSize(430,400)
+        shell.layout()
+        shell.setSize(450,400)
         shell.open()
         lastTick = shipTick = System.nanoTime()
         while (!shell.isDisposed()) {
+            long startTime = System.nanoTime()
             display.readAndDispatch()
             updateModel()
-            draw(shell)
-            Thread.yield()
+            
+            draw(canvas)
+            
+            // Aim for 100fps (1s/100frames = 10000000ns / frame)
+            TimeUnit.NANOSECONDS.sleep(startTime + 10000000 - System.nanoTime())
         }
         display.dispose()
         
