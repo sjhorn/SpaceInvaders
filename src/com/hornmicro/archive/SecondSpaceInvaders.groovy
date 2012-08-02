@@ -1,5 +1,5 @@
 
-package com.hornmicro
+package com.hornmicro.archive
 
 
 import java.util.concurrent.TimeUnit
@@ -33,7 +33,7 @@ class Sprite {
     }
 }
 
-class SpaceInvaders implements PaintListener, Listener {
+class SecondSpaceInvaders implements PaintListener, Listener {
     Display display
     Image spriteSheet
     List sprites = []
@@ -46,7 +46,7 @@ class SpaceInvaders implements PaintListener, Listener {
     Point vaderOffset = new Point(10, 0)
     Boolean vaderForward = true
     
-    SpaceInvaders(Display display) {
+    SecondSpaceInvaders(Display display) {
         Display.appName = "Space Invaders"
         this.display = new Display()
         spriteSheet = new Image(display, "gfx/SpriteSheet.png")
@@ -269,7 +269,7 @@ class SpaceInvaders implements PaintListener, Listener {
     }
     
     static main(args) {
-        new SpaceInvaders().mainLoop()
+        new SecondSpaceInvaders().mainLoop()
     }
 
 }

@@ -1,4 +1,4 @@
-package com.hornmicro
+package com.hornmicro.archive
 
 import org.eclipse.swt.SWT
 import org.eclipse.swt.events.DisposeEvent;

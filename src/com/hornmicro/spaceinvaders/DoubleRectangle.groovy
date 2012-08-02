@@ -71,11 +71,13 @@ class DoubleRectangle {
         this.height = bottom - this.top
     }
     
-    void setLeft(int left) {
+    /*
+    void setLeft(Number left) {
         this.left = left as double
     }
     
-    void setTop(int top) {
+    void setTop(Number top) {
         this.top = top as double
     }
+    */
 }

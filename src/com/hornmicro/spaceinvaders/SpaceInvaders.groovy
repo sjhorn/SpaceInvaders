@@ -14,17 +14,20 @@ import org.eclipse.swt.graphics.Rectangle
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Canvas
 import org.eclipse.swt.widgets.Display
+import org.eclipse.swt.widgets.Event
+import org.eclipse.swt.widgets.Listener
 import org.eclipse.swt.widgets.Shell
 
 
 @CompileStatic
-class SpaceInvaders implements PaintListener {
+class SpaceInvaders implements PaintListener, Listener {
     private Canvas canvas
     Display display
     Shell shell
     Image spriteSheet
     ShipSprite shipSprite
     InvaderGroup invaderGroup
+    boolean redraw = false
     
     long lastTime = 0L
     long lastTick, shipTick
@@ -44,9 +47,33 @@ class SpaceInvaders implements PaintListener {
         invaderGroup = new InvaderGroup(bounds)
     }
     
+    void handleEvent(Event event) {
+        if(event.type == SWT.KeyDown) {
+            switch(event.keyCode) {
+               case SWT.ARROW_RIGHT:
+                   shipSprite.moveRight = true
+                   break
+               case SWT.ARROW_LEFT:
+                   shipSprite.moveLeft = true
+                   break
+               case SWT.SPACE:
+                   break
+            }
+        } else if (event.type == SWT.KeyUp) {
+            switch(event.keyCode) {
+                case SWT.ARROW_RIGHT:
+                    shipSprite.moveRight = false
+                    break
+                case SWT.ARROW_LEFT:
+                    shipSprite.moveLeft = false
+                    break
+             }
+        }
+    }
+    
     void configureShell() {
-        //display.addFilter(SWT.KeyDown, this)
-        //display.addFilter(SWT.KeyUp, this)
+        display.addFilter(SWT.KeyDown, this)
+        display.addFilter(SWT.KeyUp, this)
         
         shell = new Shell(display)
         shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
@@ -69,7 +96,8 @@ class SpaceInvaders implements PaintListener {
     void updateModel() {
         if(lastTime) {
             long timePassed = System.nanoTime() - lastTime
-            invaderGroup.move(timePassed)
+            redraw = invaderGroup.move(timePassed) 
+            redraw = shipSprite.move(timePassed) || redraw
         }
         lastTime = System.nanoTime()
     }
@@ -112,7 +140,7 @@ class SpaceInvaders implements PaintListener {
              playSounds()
              
              // Aim for 100fps (1s/100 frames = 10,000,000 ns / frame)
-             TimeUnit.NANOSECONDS.sleep(startTime + 10000000 - System.nanoTime())
+             TimeUnit.NANOSECONDS.sleep(startTime + 20_000_000 - System.nanoTime())
          }
          display.dispose()
     }

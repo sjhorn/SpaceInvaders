@@ -28,9 +28,9 @@ class InvaderGroup {
             lastInvader.bottom - firstInvader.top)
     }
     
-    void move(long timePassed) {
+    boolean move(long timePassed) {
         cumulativeTime += timePassed
-        if(cumulativeTime > 100000000) {
+        if(cumulativeTime > 100000000 && location.bottom < 200) {
             location.left += dx
             dy = 0
             if(location.right >= bounds.x + bounds.width) {
@@ -43,13 +43,18 @@ class InvaderGroup {
             double left = Double.MAX_VALUE, top = Double.MAX_VALUE, right = 0, bottom = 0
             invaders.each { InvaderSprite sprite ->
                 DoubleRectangle loc = sprite.location
+                
+                // Adjust the sprite
                 loc.left += dx
                 loc.top += dy
                 
+                // Adjust the formations bounds
                 left = left < loc.left ? left : loc.left 
                 top = top < loc.top ? top : loc.top 
                 right = right > loc.right ? right : loc.right 
-                bottom = bottom < loc.bottom ? bottom : loc.bottom
+                bottom = bottom > loc.bottom ? bottom : loc.bottom
+                
+                sprite.nextState()
             }
             location.left = left
             location.top = top
@@ -57,7 +62,9 @@ class InvaderGroup {
             location.bottom = bottom
             
             cumulativeTime = 0
+            return true
         }
+        return false
     }
     
     void draw(Image spriteSheet, GC gc) {

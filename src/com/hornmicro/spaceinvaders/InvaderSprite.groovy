@@ -23,5 +23,4 @@ class InvaderSprite extends Sprite {
         }
     }
 
-
 }

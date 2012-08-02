@@ -1,4 +1,4 @@
-package com.hornmicro
+package com.hornmicro.archive
 
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;

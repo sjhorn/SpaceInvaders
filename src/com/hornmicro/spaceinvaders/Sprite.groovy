@@ -73,25 +73,26 @@ abstract class Sprite {
      * Move the sprite to its next location
      * 
      * @param timePassed - the time passed in nanoseconds since the last movement
+     * @return - return true if redraw is required
      */
-    void move(long timePassed) {
-        location.left += speedX ? ((timePassed * speedX) / 1000000000) as double : 0d
-        
+    boolean move(long timePassed) {
+        location.left += speedX ? ((timePassed * speedX) / 1_000_000_000) : 0d 
         int maxX = bounds.x + bounds.width
-        if(location.left > maxX && speedX > 0) {
+        if(location.left > maxX) {
             location.left = maxX
-        } else if (location.left < bounds.x && speedX < 0) {
+        } else if (location.left < bounds.x) {
             location.left = bounds.x
         }
         
-        location.top += speedY ? ((timePassed * speedY) / 1000000000) as double : 0d
+        location.top += speedY ? ((timePassed * speedY) / 1_000_000_000) as double : 0d
         
         int maxY = bounds.y + bounds.height
-        if(location.top > maxY && speedY > 0) {
+        if(location.top > maxY) {
             location.top = maxY   
-        } else if (location.top < bounds.y && speedY < 0) {
+        } else if (location.top < bounds.y) {
             location.top = bounds.y
         }
+        return true
     }
     
     /**
