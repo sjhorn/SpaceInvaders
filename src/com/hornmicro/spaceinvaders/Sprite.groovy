@@ -21,6 +21,7 @@ abstract class Sprite {
     Rectangle bounds
     double speedX // pixels / sec
     double speedY // pixels / sec
+    public boolean exploding = false
     
     public Sprite() {
     }
@@ -78,8 +79,8 @@ abstract class Sprite {
     boolean move(long timePassed) {
         location.left += speedX ? ((timePassed * speedX) / 1_000_000_000) : 0d 
         int maxX = bounds.x + bounds.width
-        if(location.left > maxX) {
-            location.left = maxX
+        if(location.getRight() > maxX) {
+            location.setRight(maxX as double)
         } else if (location.left < bounds.x) {
             location.left = bounds.x
         }
@@ -87,8 +88,8 @@ abstract class Sprite {
         location.top += speedY ? ((timePassed * speedY) / 1_000_000_000) as double : 0d
         
         int maxY = bounds.y + bounds.height
-        if(location.top > maxY) {
-            location.top = maxY   
+        if(location.getBottom() > maxY) {
+            location.setBottom(maxY as double)   
         } else if (location.top < bounds.y) {
             location.top = bounds.y
         }
@@ -101,7 +102,7 @@ abstract class Sprite {
      * @param sprite - the sprite to detect collision
      * @return - return true if the sprite collides with this sprite
      */
-    boolean collisionDetected(Sprite sprite) {
+    boolean collidesWith(Sprite sprite) {
         return location.intersects(sprite.location)
     }
     

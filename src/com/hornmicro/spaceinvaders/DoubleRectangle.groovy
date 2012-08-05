@@ -10,8 +10,8 @@ class DoubleRectangle {
     public double top
     public double width
     public double height
-    Rectangle rect
-    Rectangle otherRect
+    Rectangle rect = new Rectangle(0,0,0,0)
+    Rectangle otherRect = new Rectangle(0,0,0,0)
     
     DoubleRectangle(double left, double top, double width, double height) {
         this.left = left;
@@ -64,11 +64,18 @@ class DoubleRectangle {
     }
     
     double setRight(double right) {
-        this.width = right - this.left
+        this.left += right - this.getRight()
     }
     
     double setBottom(double bottom) {
-        this.height = bottom - this.top
+        this.height += bottom - this.getBottom()
+    }
+    
+    boolean outside(Rectangle bounds) {
+        return this.top <= bounds.y || 
+            getBottom() >= (bounds.y + bounds.height) ||
+            this.left <= bounds.x ||
+            getRight() >= (bounds.x + bounds.width)
     }
     
     /*

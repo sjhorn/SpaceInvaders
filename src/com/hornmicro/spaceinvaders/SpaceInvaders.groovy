@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Shell
 
 @CompileStatic
 class SpaceInvaders implements PaintListener, Listener {
-    private Canvas canvas
+    Canvas canvas
     Display display
     Shell shell
     Image spriteSheet
@@ -30,7 +30,6 @@ class SpaceInvaders implements PaintListener, Listener {
     boolean redraw = false
     
     long lastTime = 0L
-    long lastTick, shipTick
     
     SpaceInvaders() {
         Display.setAppName("Space Invaders")
@@ -38,10 +37,10 @@ class SpaceInvaders implements PaintListener, Listener {
         configureShell()
         
         spriteSheet = new Image(display, "gfx/SpriteSheet.png")
-        Rectangle bounds = shell.getBounds()
+        Rectangle bounds = shell.getClientArea()
         
         // Add space ship
-        shipSprite = new ShipSprite(new Rectangle(3,60,25,20), bounds, new Rectangle(10,300,25,20))
+        shipSprite = new ShipSprite(bounds)
         
         // Add space invaders
         invaderGroup = new InvaderGroup(bounds)
@@ -57,6 +56,8 @@ class SpaceInvaders implements PaintListener, Listener {
                    shipSprite.moveLeft = true
                    break
                case SWT.SPACE:
+               case 0x20:
+                   BulletSprite.fireFromShip(shipSprite)
                    break
             }
         } else if (event.type == SWT.KeyUp) {
@@ -98,7 +99,20 @@ class SpaceInvaders implements PaintListener, Listener {
             long timePassed = System.nanoTime() - lastTime
             redraw = invaderGroup.move(timePassed) 
             redraw = shipSprite.move(timePassed) || redraw
+            redraw = BulletSprite.moveAll(timePassed) || redraw
+            
+            // Detect collisions
+            BulletSprite.detectCollisions(invaderGroup.invaders).each { Sprite sprite ->
+                if(sprite instanceof InvaderSprite) {
+                    sprite.exploding = true
+                    sprite.frameIndex = 2
+                } else if(sprite instanceof BulletSprite) {
+                    BulletSprite.bullets.remove(sprite)
+                }
+            }
+            
         }
+        
         lastTime = System.nanoTime()
     }
     
@@ -111,6 +125,7 @@ class SpaceInvaders implements PaintListener, Listener {
         
         invaderGroup.draw(spriteSheet, gc)
         shipSprite.draw(spriteSheet, gc)
+        BulletSprite.drawAll(spriteSheet, gc)
         
         gc.dispose()
     }
@@ -128,8 +143,6 @@ class SpaceInvaders implements PaintListener, Listener {
              play sounds
          end while
          */
-         
-         lastTick = shipTick = System.nanoTime()
          
          shell.open()
          while (!shell.isDisposed()) {

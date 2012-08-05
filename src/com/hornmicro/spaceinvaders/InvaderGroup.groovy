@@ -7,11 +7,13 @@ import org.eclipse.swt.graphics.Rectangle;
 class InvaderGroup {
     DoubleRectangle location
     Rectangle bounds
-    long cumulativeTime = 0
+    long moveTime = 0
+    long explosionTime = 0
     long dx = 5
     long dy = 0
     
     List<InvaderSprite> invaders = []
+    List<InvaderSprite> invadersToRemove = []
     
     InvaderGroup(Rectangle bounds) {
         this.bounds = bounds
@@ -29,8 +31,25 @@ class InvaderGroup {
     }
     
     boolean move(long timePassed) {
-        cumulativeTime += timePassed
-        if(cumulativeTime > 100000000 && location.bottom < 200) {
+        moveTime += timePassed
+        explosionTime += timePassed
+        
+        if(explosionTime > 150_000_000) {
+            invaders.each { InvaderSprite sprite ->
+                if(sprite.exploding) {
+                    sprite.nextState()
+                
+                    if(sprite.frameIndex >= sprite.spriteFrames.size()) {
+                        invadersToRemove.add(sprite)
+                    }
+                }
+            }
+            invaders.removeAll(invadersToRemove)
+            invadersToRemove.clear()
+            explosionTime = 0
+        }
+        
+        if(moveTime > 750_000_000 && location.bottom < 200) {
             location.left += dx
             dy = 0
             if(location.right >= bounds.x + bounds.width) {
@@ -54,14 +73,17 @@ class InvaderGroup {
                 right = right > loc.right ? right : loc.right 
                 bottom = bottom > loc.bottom ? bottom : loc.bottom
                 
-                sprite.nextState()
+                if(!sprite.exploding) {
+                    sprite.nextState()
+                }
             }
+            
             location.left = left
             location.top = top
             location.right = right
             location.bottom = bottom
             
-            cumulativeTime = 0
+            moveTime = 0
             return true
         }
         return false

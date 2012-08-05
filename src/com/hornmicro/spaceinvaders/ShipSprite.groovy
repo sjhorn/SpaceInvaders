@@ -9,8 +9,8 @@ class ShipSprite extends Sprite {
     public boolean moveLeft = false
     public boolean moveRight = false
     
-    ShipSprite(Rectangle spriteFrame, Rectangle bounds, Rectangle location) {
-        super(spriteFrame, bounds, location)
+    ShipSprite(Rectangle bounds) {
+        super(new Rectangle(3,60,25,20), bounds, new Rectangle(10,300,25,20))
     }
     
     void nextState() {
