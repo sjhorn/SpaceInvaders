@@ -10,7 +10,7 @@ class ShipSprite extends Sprite {
     public boolean moveRight = false
     
     ShipSprite(Rectangle bounds) {
-        super(new Rectangle(3,60,25,20), bounds, new Rectangle(10,300,25,20))
+        super(new Rectangle(3,60,25,20), bounds, new Rectangle(bounds.x,330,25,20))
     }
     
     void nextState() {

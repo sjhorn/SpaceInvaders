@@ -27,6 +27,7 @@ class SpaceInvaders implements PaintListener, Listener {
     Image spriteSheet
     ShipSprite shipSprite
     InvaderGroup invaderGroup
+    Rectangle bounds
     boolean redraw = false
     
     long lastTime = 0L
@@ -37,13 +38,15 @@ class SpaceInvaders implements PaintListener, Listener {
         configureShell()
         
         spriteSheet = new Image(display, "gfx/SpriteSheet.png")
-        Rectangle bounds = shell.getClientArea()
+        bounds = shell.getClientArea()
         
         // Add space ship
-        shipSprite = new ShipSprite(bounds)
+        Rectangle shipBounds = new Rectangle(bounds.width / 2 - 156, 0, 312, bounds.height)
+        shipSprite = new ShipSprite(shipBounds)
         
         // Add space invaders
-        invaderGroup = new InvaderGroup(bounds)
+        Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 220, 80, 440, bounds.height - 80)
+        invaderGroup = new InvaderGroup(invaderBounds)
     }
     
     void handleEvent(Event event) {
@@ -86,7 +89,7 @@ class SpaceInvaders implements PaintListener, Listener {
         
         shell.setLayout(new FillLayout())
         shell.layout()
-        shell.setSize(450,400)
+        shell.setSize(576,400)
     }
     
     void paintControl(PaintEvent pe) {
@@ -122,6 +125,9 @@ class SpaceInvaders implements PaintListener, Listener {
         gc.setInterpolation(SWT.NONE)
         
         gc.fillRectangle(canvas.getClientArea())
+        gc.drawImage(spriteSheet,
+            0, 160, 576, 30,
+            0, 350, 576, 30)
         
         invaderGroup.draw(spriteSheet, gc)
         shipSprite.draw(spriteSheet, gc)

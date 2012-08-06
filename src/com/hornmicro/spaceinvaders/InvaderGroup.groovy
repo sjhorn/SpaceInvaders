@@ -20,7 +20,7 @@ class InvaderGroup {
         (0..5).each { int row ->
             (0..5).each { int col ->
                 int item = row * 6 + col
-                invaders.add( new InvaderSprite(row, bounds, new Rectangle(col * 64, row * 30, 32, 20)) )
+                invaders.add( new InvaderSprite(row, bounds, new Rectangle(bounds.x + col * 64, row * 30, 32, 20)) )
             }
         }
         DoubleRectangle firstInvader = invaders[0].location
