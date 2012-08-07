@@ -80,7 +80,7 @@ abstract class Sprite {
         location.left += speedX ? ((timePassed * speedX) / 1_000_000_000) : 0d 
         int maxX = bounds.x + bounds.width
         if(location.getRight() > maxX) {
-            location.setRight(maxX as double)
+            location.left = maxX - location.width
         } else if (location.left < bounds.x) {
             location.left = bounds.x
         }
@@ -89,7 +89,7 @@ abstract class Sprite {
         
         int maxY = bounds.y + bounds.height
         if(location.getBottom() > maxY) {
-            location.setBottom(maxY as double)   
+            location.top = maxY - location.height   
         } else if (location.top < bounds.y) {
             location.top = bounds.y
         }

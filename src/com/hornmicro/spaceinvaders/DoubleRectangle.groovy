@@ -64,11 +64,13 @@ class DoubleRectangle {
     }
     
     double setRight(double right) {
-        this.left += right - this.getRight()
+        this.width = right - this.left
+        //this.left += right - this.getRight()
     }
     
     double setBottom(double bottom) {
-        this.height += bottom - this.getBottom()
+        this.height = bottom - this.top
+        //this.height += bottom - this.getBottom()
     }
     
     boolean outside(Rectangle bounds) {
@@ -87,4 +89,7 @@ class DoubleRectangle {
         this.top = top as double
     }
     */
+    String toString() {
+        return "$left, $top, $right, $bottom"
+    }
 }

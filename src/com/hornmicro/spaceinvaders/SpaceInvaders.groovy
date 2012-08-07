@@ -45,7 +45,7 @@ class SpaceInvaders implements PaintListener, Listener {
         shipSprite = new ShipSprite(shipBounds)
         
         // Add space invaders
-        Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 220, 80, 440, bounds.height - 80)
+        Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, 60, 420, bounds.height - 100)
         invaderGroup = new InvaderGroup(invaderBounds)
     }
     

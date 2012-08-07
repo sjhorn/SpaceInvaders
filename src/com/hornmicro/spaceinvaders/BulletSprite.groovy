@@ -22,7 +22,7 @@ class BulletSprite extends Sprite {
     static void fireFromShip(ShipSprite ship) {
         
         // Only create a new bullet if the last one is gone!
-        if(! bullets.type.find { it == Type.SHIP } ) {
+        //if(! bullets.type.find { it == Type.SHIP } ) {
             DoubleRectangle shipLoc = ship.location
             DoubleRectangle location = new DoubleRectangle(
                 shipLoc.left + shipLoc.width / 2 - 1.5d,
@@ -32,7 +32,7 @@ class BulletSprite extends Sprite {
             )
             Rectangle bounds = new Rectangle(ship.bounds.x, ship.bounds.y-16, ship.bounds.width, ship.bounds.height+32)
             bullets.add(new BulletSprite(bounds, location, Type.SHIP))
-        }    
+        //}    
     }
     
     static boolean moveAll(long timeElapsed) {
@@ -61,7 +61,7 @@ class BulletSprite extends Sprite {
             bullets.each { Sprite bullet ->
                 if(!sprite.exploding && sprite.collidesWith(bullet)) {
                     collisions.add(sprite)
-                    collisions.add(bullet)
+                    //collisions.add(bullet)
                 }
             }
         }
