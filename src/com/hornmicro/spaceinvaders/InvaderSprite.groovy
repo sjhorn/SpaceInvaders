@@ -9,7 +9,7 @@ import org.eclipse.swt.graphics.Rectangle
 @CompileStatic
 class InvaderSprite extends Sprite {
     
-    InvaderSprite(int row, Rectangle bounds, Rectangle location) {
+    InvaderSprite(int row, Rectangle bounds, DoubleRectangle location) {
         super(
             [ 
                 new Rectangle(row * 64,0,32,20), new Rectangle(row * 64 + 32,0,32,20), // Left / Right
@@ -25,6 +25,11 @@ class InvaderSprite extends Sprite {
         if(frameIndex > 1 && !exploding) {
             frameIndex = 0
         }
+    }
+    
+    void explode() {
+        frameIndex = 2
+        super.explode()
     }
 
 }

@@ -10,14 +10,14 @@ class DoubleRectangle {
     public double top
     public double width
     public double height
-    Rectangle rect = new Rectangle(0,0,0,0)
-    Rectangle otherRect = new Rectangle(0,0,0,0)
+    public double right
+    public double bottom
     
     DoubleRectangle(double left, double top, double width, double height) {
-        this.left = left;
-        this.top = top;
-        this.width = width;
-        this.height = height;
+        setLeft(left)
+        setTop(top)
+        setWidth(width)
+        setHeight(height)
     }
     
     static DoubleRectangle fromRectangle(Rectangle rect) {
@@ -26,69 +26,42 @@ class DoubleRectangle {
     }
     
     boolean intersects(DoubleRectangle other) {
-        rect.x = left as int 
-        rect.y = top as int
-        rect.width = width as int
-        rect.height = height as int
-        
-        otherRect.x = other.left as int
-        otherRect.y = other.top as int
-        otherRect.width = other.width as int
-        otherRect.height = other.height as int
-        return rect.intersects(otherRect)
+        if (left < other.right && other.left < right && top < other.bottom && other.top < bottom) {
+            return true
+        }
+        return false
     }
     
-    boolean intersects(Rectangle other) {
-        rect.x = left as int
-        rect.y = top as int
-        rect.width = width as int
-        rect.height = height as int
-        
-        return rect.intersects(other)
-    } 
-    
-    Rectangle getRectangle() {
-        rect.x = left as int
-        rect.y = top as int
-        rect.width = width as int
-        rect.height = height as int
-        return rect
+    void setLeft(double left) {
+        this.left = left
+        if(this.width) this.right = left + this.width
     }
     
-    double getRight() {
-        return left + width
+    void setWidth(double width) {
+        this.width = width
+        if(this.left) this.right = this.left + width
     }
     
-    double getBottom() {
-        return top + height    
+    void setTop(double top) {
+        this.top = top
+        if(this.height) this.bottom = top + this.height
     }
     
-    double setRight(double right) {
-        this.width = right - this.left
-        //this.left += right - this.getRight()
-    }
-    
-    double setBottom(double bottom) {
-        this.height = bottom - this.top
-        //this.height += bottom - this.getBottom()
+    void setHeight(double height) {
+        this.height = height
+        if(this.top) this.bottom = this.top + height
     }
     
     boolean outside(Rectangle bounds) {
-        return this.top <= bounds.y || 
-            getBottom() >= (bounds.y + bounds.height) ||
+        def res = this.top <= bounds.y || 
+            bottom >= (bounds.y + bounds.height) ||
             this.left <= bounds.x ||
-            getRight() >= (bounds.x + bounds.width)
+            right >= (bounds.x + bounds.width)
+        //println "${this.top} <= ${bounds.y} || ${getBottom()} >= ${(bounds.y + bounds.height)} || ${this.left} <= ${bounds.x} || ${getRight()} >= ${(bounds.x + bounds.width)}"
+        //println "Outside ? $res"
+        return res
     }
     
-    /*
-    void setLeft(Number left) {
-        this.left = left as double
-    }
-    
-    void setTop(Number top) {
-        this.top = top as double
-    }
-    */
     String toString() {
         return "$left, $top, $right, $bottom"
     }

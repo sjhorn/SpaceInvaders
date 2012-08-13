@@ -29,7 +29,7 @@ class SpaceInvaders implements PaintListener, Listener {
     InvaderGroup invaderGroup
     Rectangle bounds
     boolean redraw = false
-    
+    long newLifeTime = 0
     long lastTime = 0L
     
     SpaceInvaders() {
@@ -100,18 +100,25 @@ class SpaceInvaders implements PaintListener, Listener {
     void updateModel() {
         if(lastTime) {
             long timePassed = System.nanoTime() - lastTime
-            redraw = invaderGroup.move(timePassed) 
-            redraw = shipSprite.move(timePassed) || redraw
-            redraw = BulletSprite.moveAll(timePassed) || redraw
+                
+            invaderGroup.move(timePassed, shipSprite.isStarting() || shipSprite.isExploding())
+            shipSprite.move(timePassed)
+            BulletSprite.moveAll(timePassed)
             
+            redraw = true
+
             // Detect collisions
-            BulletSprite.detectCollisions(invaderGroup.invaders).each { Sprite sprite ->
-                if(sprite instanceof InvaderSprite) {
-                    sprite.exploding = true
-                    sprite.frameIndex = 2
-                } else if(sprite instanceof BulletSprite) {
-                    BulletSprite.bullets.remove(sprite)
-                }
+            def time = System.nanoTime()
+            
+            List sprites = [ shipSprite, invaderGroup.invaders ]
+            for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
+                sprite.explode()
+            }
+            
+            if(BulletSprite.bullets.size()) {
+                long test = TimeUnit.MILLISECONDS.convert(System.nanoTime() - time, TimeUnit.NANOSECONDS)
+                if(test > 10 )
+                    println( "${test.toString()} ms" )
             }
             
         }
@@ -128,7 +135,6 @@ class SpaceInvaders implements PaintListener, Listener {
         gc.drawImage(spriteSheet,
             0, 160, 576, 30,
             0, 350, 576, 30)
-        
         invaderGroup.draw(spriteSheet, gc)
         shipSprite.draw(spriteSheet, gc)
         BulletSprite.drawAll(spriteSheet, gc)
@@ -149,14 +155,14 @@ class SpaceInvaders implements PaintListener, Listener {
              play sounds
          end while
          */
-         
+        
          shell.open()
          while (!shell.isDisposed()) {
              long startTime = System.nanoTime()
              display.readAndDispatch()
              updateModel()
              draw()
-             playSounds()
+             //playSounds()
              
              // Aim for 100fps (1s/100 frames = 10,000,000 ns / frame)
              TimeUnit.NANOSECONDS.sleep(startTime + 20_000_000 - System.nanoTime())

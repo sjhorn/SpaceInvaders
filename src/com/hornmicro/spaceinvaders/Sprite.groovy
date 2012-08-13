@@ -35,7 +35,7 @@ abstract class Sprite {
      * @param speedX - the pixel/sec rate in the x (hortizontal) direction that this sprite moves
      * @param speedY - the pixel/sec rate in the y (vertical) direction that this sprite moves
      */
-    public Sprite(Rectangle spriteFrame, Rectangle bounds, Rectangle location, double speedX=0, double speedY=0 ) { 
+    public Sprite(Rectangle spriteFrame, Rectangle bounds, DoubleRectangle location, double speedX=0, double speedY=0 ) { 
         this([spriteFrame] as List<Rectangle>, bounds, location, speedX, speedY)
     }
     
@@ -48,10 +48,10 @@ abstract class Sprite {
      * @param speedX - the pixel/sec rate in the x (hortizontal) direction that this sprite moves
      * @param speedY - the pixel/sec rate in the y (vertical) direction that this sprite moves
      */
-    public Sprite(List<Rectangle> spriteFrames, Rectangle bounds, Rectangle location, double speedX=0, double speedY=0) {
+    public Sprite(List<Rectangle> spriteFrames, Rectangle bounds, DoubleRectangle location, double speedX=0, double speedY=0) {
         this.spriteFrames = spriteFrames
         this.bounds = bounds
-        this.location = DoubleRectangle.fromRectangle(location)
+        this.location = location
         this.speedX = speedX
         this.speedY = speedY
     }
@@ -64,6 +64,7 @@ abstract class Sprite {
      * @param gc - the graphic context to draw to
      */
     void draw(Image spriteSheet, GC gc) {
+        if(gc.isDisposed()) return
         Rectangle frame = spriteFrames[frameIndex]
         gc.drawImage(spriteSheet,
             frame.x, frame.y, frame.width, frame.height,
@@ -77,18 +78,17 @@ abstract class Sprite {
      * @return - return true if redraw is required
      */
     boolean move(long timePassed) {
-        location.left += speedX ? ((timePassed * speedX) / 1_000_000_000) : 0d 
+        location.left += (speedX ? ((timePassed * speedX) / 1_000_000_000) : 0d) 
         int maxX = bounds.x + bounds.width
-        if(location.getRight() > maxX) {
+        if(location.right > maxX) {
             location.left = maxX - location.width
         } else if (location.left < bounds.x) {
             location.left = bounds.x
         }
         
-        location.top += speedY ? ((timePassed * speedY) / 1_000_000_000) as double : 0d
-        
+        location.top += (speedY ? ((timePassed * speedY) / 1_000_000_000) : 0d)
         int maxY = bounds.y + bounds.height
-        if(location.getBottom() > maxY) {
+        if(location.bottom > maxY) {
             location.top = maxY - location.height   
         } else if (location.top < bounds.y) {
             location.top = bounds.y
@@ -97,13 +97,17 @@ abstract class Sprite {
     }
     
     /**
-     * Detect a collision between this an another sprite
+     * Detect a collision between this and another sprite
      * 
      * @param sprite - the sprite to detect collision
      * @return - return true if the sprite collides with this sprite
      */
     boolean collidesWith(Sprite sprite) {
-        return location.intersects(sprite.location)
+        DoubleRectangle rect = sprite.location
+        if (location.left < rect.right && rect.left < location.right && location.top < rect.bottom && rect.top < location.bottom) {
+            return true
+        }
+        return false
     }
     
     /**
@@ -112,4 +116,8 @@ abstract class Sprite {
      * at regular intervals
      */
     abstract void nextState()
+    
+    void explode() {
+        exploding = true
+    }
 }
