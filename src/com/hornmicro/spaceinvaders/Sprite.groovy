@@ -66,9 +66,11 @@ abstract class Sprite {
     void draw(Image spriteSheet, GC gc) {
         if(gc.isDisposed()) return
         Rectangle frame = spriteFrames[frameIndex]
-        gc.drawImage(spriteSheet,
-            frame.x, frame.y, frame.width, frame.height,
-            location.left as int, location.top as int, frame.width, frame.height)
+        if(frame) {
+            gc.drawImage(spriteSheet,
+                frame.x, frame.y, frame.width, frame.height,
+                location.left as int, location.top as int, frame.width, frame.height)
+        }
     }
     
     /**

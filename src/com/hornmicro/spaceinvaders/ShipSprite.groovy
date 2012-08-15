@@ -97,6 +97,7 @@ class ShipSprite extends Sprite {
     void newLife() {
         location.left = bounds.x
         exploding = false
+        frameIndex = 0
         startingTime = STARTING_TIME
     }
     

@@ -132,6 +132,22 @@ class SpaceInvaders implements PaintListener, Listener {
         gc.setInterpolation(SWT.NONE)
         
         gc.fillRectangle(canvas.getClientArea())
+        
+        // Draw Score
+        (0..3).each { int offset ->
+            gc.drawImage(spriteSheet,
+                0, 80, 42, 20,
+                15+(offset*55), 20, 42, 20)
+        }
+        (0..3).each { int offset ->
+            gc.drawImage(spriteSheet,
+                0, 100, 42, 20,
+                515-(offset*55), 20, 42, 20)
+        }
+        
+        
+        
+        // Draw Earth
         gc.drawImage(spriteSheet,
             0, 160, 576, 30,
             0, 350, 576, 30)
