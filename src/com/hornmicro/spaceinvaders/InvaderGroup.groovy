@@ -18,6 +18,8 @@ class InvaderGroup {
     List<InvaderSprite> invaders = []
     List<InvaderSprite> invadersToRemove = []
     Map invaderColumn = [:]
+    Sound invaderSound = new Sound("sounds/invaders.wav")
+    
     
     InvaderGroup(Rectangle bounds) {
         this.bounds = bounds
@@ -46,7 +48,7 @@ class InvaderGroup {
                     sprite.nextState()
                 
                     if(sprite.frameIndex >= sprite.spriteFrames.size()) {
-                        waitTime -= 20_000_000
+                        waitTime -= 17_000_000
                         invadersToRemove.add(sprite)
                         invaderColumn.each { k, v ->
                             v.remove(sprite)
@@ -73,6 +75,7 @@ class InvaderGroup {
             
             
             if(moveTime > waitTime && location.bottom < 330) {
+                invaderSound.play()
                 location.left += dx
                 dy = 0
                 if(location.right >= (bounds.x + bounds.width)) {
