@@ -10,6 +10,10 @@ class BulletSprite extends Sprite {
     enum TYPE { SHIP, INVADER }
     static public List<BulletSprite> bullets = []
     static public List<BulletSprite> bulletsToRemove = []
+    static Sound shipfire = new Sound("sounds/shipfire.wav")
+    static Sound shiphit = new Sound("sounds/shiphit.wav")
+    static Sound invaderhit = new Sound("sounds/invaderhit.wav")
+    
     public TYPE type
     
     BulletSprite(Rectangle bounds, DoubleRectangle location, TYPE type) {
@@ -43,6 +47,7 @@ class BulletSprite extends Sprite {
             )
             Rectangle bounds = new Rectangle(ship.bounds.x, ship.bounds.y-16, ship.bounds.width, ship.bounds.height+32)
             bullets.add(new BulletSprite(bounds, location, TYPE.SHIP))
+            shipfire.play()
         }    
     }
     
@@ -97,5 +102,11 @@ class BulletSprite extends Sprite {
     
     void explode() {
         BulletSprite.bullets.remove(this)
+        if(type == TYPE.SHIP) {
+            shipfire.stop()
+            invaderhit.play()
+        } else {
+            shiphit.play()
+        }
     }
 }
