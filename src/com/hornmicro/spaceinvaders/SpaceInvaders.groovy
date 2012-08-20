@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit
 
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.swt.SWT
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener
 import org.eclipse.swt.events.PaintEvent
 import org.eclipse.swt.events.PaintListener
 import org.eclipse.swt.graphics.GC
@@ -20,7 +22,7 @@ import org.eclipse.swt.widgets.Shell
 
 
 @CompileStatic
-class SpaceInvaders implements PaintListener, Listener {
+class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     Canvas canvas
     Display display
     Shell shell
@@ -87,6 +89,7 @@ class SpaceInvaders implements PaintListener, Listener {
         canvas.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
         canvas.addPaintListener(this)
         
+        shell.addDisposeListener(this)
         shell.setLayout(new FillLayout())
         shell.layout()
         shell.setSize(576,400)
@@ -192,7 +195,18 @@ class SpaceInvaders implements PaintListener, Listener {
         } catch(e) {
             StackTraceUtils.deepSanitize(e)
             e.printStackTrace()
+        } finally {
+            
+            // Seems to be a bug in AWT when used with SWT. 
+            System.exit(0)
         }
+    }
+
+    void widgetDisposed(DisposeEvent de) {
+        BulletSprite.invaderhit.close()
+        BulletSprite.shipfire.close()
+        BulletSprite.shiphit.close()
+        InvaderGroup.invaderSound.close()
     }
 
 }

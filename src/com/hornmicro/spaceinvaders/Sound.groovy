@@ -1,13 +1,23 @@
 package com.hornmicro.spaceinvaders
 
+import java.awt.Window
+
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import javax.sound.sampled.DataLine
-import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineEvent
 import javax.sound.sampled.LineListener
 import javax.sound.sampled.DataLine.Info
+
+import org.eclipse.swt.SWT
+import org.eclipse.swt.events.SelectionAdapter
+import org.eclipse.swt.events.SelectionEvent
+import org.eclipse.swt.layout.GridLayout
+import org.eclipse.swt.widgets.Button
+import org.eclipse.swt.widgets.Display
+import org.eclipse.swt.widgets.Shell
 
 class Sound implements LineListener {
     Clip clip
@@ -27,11 +37,15 @@ class Sound implements LineListener {
         
         this.clip = (Clip) AudioSystem.getLine(info)
         clip.open(af, audio, 0, size)
+        clip.addLineListener(this)
     }
     
     void update(LineEvent le) {
         if (le.getType().equals(LineEvent.Type.STOP)){
             println "Finished"
+        }
+        if (le.getType().equals(LineEvent.Type.CLOSE)){
+            println "Should Close"
         }
     }
     
@@ -39,7 +53,15 @@ class Sound implements LineListener {
         clip.stop()
     }
     
+    void close() {
+        clip.drain()
+        clip.close()
+    }
+    
     void play() {
+        if(clip.isRunning()) {
+            clip.stop()
+        }
         clip.setMicrosecondPosition(0)
         clip.start()
     }
@@ -64,13 +86,35 @@ class Sound implements LineListener {
     
 
     static main(args) {
-        new Sound("sounds/shipfire.wav").play()
+        new Sound("sounds/shipfire.wav")
         
-        Thread.sleep(800)
+        Display display = new Display();
+        Shell shell = new Shell(display);
+        shell.setLayout(new GridLayout(1, false));
+
+        Button button = new Button(shell, SWT.PUSH)
+        button.text = "Play"
+        button.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent arg0) {
+                new Sound("sounds/shipfire.wav").play()
         
-        new Sound("sounds/invaderhit.wav").play()
+                Thread.sleep(800)
+                
+                new Sound("sounds/invaderhit.wav").play()
+                
+                Thread.sleep(1000)
+            }
+        })
+
+        shell.pack();
+        shell.open();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch())
+                display.sleep();
+        }
+        display.dispose();
         
-        Thread.sleep(1000)
+        //System.exit(0)
     }
 
     

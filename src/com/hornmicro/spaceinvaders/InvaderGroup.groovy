@@ -18,7 +18,7 @@ class InvaderGroup {
     List<InvaderSprite> invaders = []
     List<InvaderSprite> invadersToRemove = []
     Map invaderColumn = [:]
-    Sound invaderSound = new Sound("sounds/invaders.wav")
+    static final Sound invaderSound = new Sound("sounds/invaders.wav")
     
     
     InvaderGroup(Rectangle bounds) {
