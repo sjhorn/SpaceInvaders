@@ -1,7 +1,5 @@
 package com.hornmicro.spaceinvaders
 
-import java.awt.Window
-
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
@@ -42,10 +40,10 @@ class Sound implements LineListener {
     
     void update(LineEvent le) {
         if (le.getType().equals(LineEvent.Type.STOP)){
-            println "Finished"
+            //println "Finished"
         }
         if (le.getType().equals(LineEvent.Type.CLOSE)){
-            println "Should Close"
+            //println "Should Close"
         }
     }
     

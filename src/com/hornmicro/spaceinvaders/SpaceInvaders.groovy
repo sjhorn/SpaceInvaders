@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.swt.SWT
-import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeEvent
 import org.eclipse.swt.events.DisposeListener
 import org.eclipse.swt.events.PaintEvent
 import org.eclipse.swt.events.PaintListener
@@ -27,7 +27,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     Display display
     Shell shell
     Image spriteSheet
+    BaseSprite baseSprite1
+    BaseSprite baseSprite2
+    BaseSprite baseSprite3
     ShipSprite shipSprite
+    EarthSprite earthSprite
+    PlayerOneScoreSprite playerOneScoreSprite
+    PlayerTwoScoreSprite playerTwoScoreSprite
+    
     InvaderGroup invaderGroup
     Rectangle bounds
     boolean redraw = false
@@ -41,6 +48,18 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         
         spriteSheet = new Image(display, "gfx/SpriteSheet.png")
         bounds = shell.getClientArea()
+        
+        // Scores
+        playerOneScoreSprite = new PlayerOneScoreSprite(bounds)
+        playerTwoScoreSprite = new PlayerTwoScoreSprite(bounds)
+        
+        // Add Earth
+        earthSprite = new EarthSprite(bounds)
+        
+        // Add bases
+        baseSprite1 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 130,bounds.height - 110,31,36))
+        baseSprite2 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 15,bounds.height - 110,31,36))
+        baseSprite3 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100,bounds.height - 110,31,36))
         
         // Add space ship
         Rectangle shipBounds = new Rectangle(bounds.width / 2 - 156, 0, 312, bounds.height)
@@ -92,7 +111,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         shell.addDisposeListener(this)
         shell.setLayout(new FillLayout())
         shell.layout()
-        shell.setSize(576,400)
+        shell.setSize(576,440)
     }
     
     void paintControl(PaintEvent pe) {
@@ -113,7 +132,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             // Detect collisions
             def time = System.nanoTime()
             
-            List sprites = [ shipSprite, invaderGroup.invaders ]
+            List sprites = [ shipSprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
             for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
                 sprite.explode()
             }
@@ -133,27 +152,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         if(!shell || shell.isDisposed()) return
         GC gc = new GC(canvas)
         gc.setInterpolation(SWT.NONE)
-        
         gc.fillRectangle(canvas.getClientArea())
         
-        // Draw Score
-        (0..3).each { int offset ->
-            gc.drawImage(spriteSheet,
-                0, 80, 42, 20,
-                15+(offset*55), 20, 42, 20)
-        }
-        (0..3).each { int offset ->
-            gc.drawImage(spriteSheet,
-                0, 100, 42, 20,
-                515-(offset*55), 20, 42, 20)
-        }
-        
-        
-        
-        // Draw Earth
-        gc.drawImage(spriteSheet,
-            0, 160, 576, 30,
-            0, 350, 576, 30)
+        playerOneScoreSprite.draw(spriteSheet, gc)
+        playerTwoScoreSprite.draw(spriteSheet, gc)
+        earthSprite.draw(spriteSheet, gc)
+        baseSprite1.draw(spriteSheet, gc)
+        baseSprite2.draw(spriteSheet, gc)
+        baseSprite3.draw(spriteSheet, gc)
         invaderGroup.draw(spriteSheet, gc)
         shipSprite.draw(spriteSheet, gc)
         BulletSprite.drawAll(spriteSheet, gc)
@@ -181,7 +187,6 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
              display.readAndDispatch()
              updateModel()
              draw()
-             //playSounds()
              
              // Aim for 100fps (1s/100 frames = 10,000,000 ns / frame)
              TimeUnit.NANOSECONDS.sleep(startTime + 20_000_000 - System.nanoTime())
@@ -197,15 +202,16 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             e.printStackTrace()
         } finally {
             
-            // Seems to be a bug in AWT when used with SWT. 
+            // Seems to be a bug in JavaSound/AWT when used with SWT.
+            // So AWT thread never ends - we force it here
             System.exit(0)
         }
     }
 
     void widgetDisposed(DisposeEvent de) {
-        BulletSprite.invaderhit.close()
+        InvaderSprite.invaderhit.close()
         BulletSprite.shipfire.close()
-        BulletSprite.shiphit.close()
+        ShipSprite.shiphit.close()
         InvaderGroup.invaderSound.close()
     }
 

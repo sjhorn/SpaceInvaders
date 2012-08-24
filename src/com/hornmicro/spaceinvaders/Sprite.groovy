@@ -117,7 +117,9 @@ abstract class Sprite {
      * Simple logic to update the internal state/model of the sprite
      * at regular intervals
      */
-    abstract void nextState()
+    void nextState() {
+        
+    }
     
     void explode() {
         exploding = true

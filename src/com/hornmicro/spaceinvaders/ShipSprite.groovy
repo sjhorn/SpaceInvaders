@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.Rectangle
 
 @CompileStatic
 class ShipSprite extends Sprite {
+    static final Sound shiphit = new Sound("sounds/shiphit.wav")
     static final long STARTING_TIME = 2_000_000_000
     static final long EXPLODING_TIME = 1_200_000_000
     public boolean moveLeft = false
@@ -29,7 +30,7 @@ class ShipSprite extends Sprite {
                 new Rectangle(3,60,25,20),    // Normal 
                 new Rectangle(34,60,25,20), new Rectangle(66,60,25,20) // Explosion
             ],
-            bounds, new DoubleRectangle(bounds.x,330,25,20)
+            bounds, new DoubleRectangle(bounds.x,bounds.height-50,25,20)
         )
         lifeRectangles = [
             new Rectangle(133, 120, 42, 20),
@@ -112,6 +113,7 @@ class ShipSprite extends Sprite {
     void explode() {
         explodingTime = EXPLODING_TIME
         frameIndex = 2
+        shiphit.play()
         super.explode()
     }
 }
