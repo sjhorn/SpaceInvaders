@@ -62,14 +62,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         baseSprite3 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100,bounds.height - 110,31,36))
         
         // Add space ship
-        Rectangle shipBounds = new Rectangle(bounds.width / 2 - 156, 0, 312, bounds.height)
+        Rectangle shipBounds = new Rectangle(131, 0, 312, bounds.height)
         shipSprite = new ShipSprite(shipBounds)
         
         
         // Add space invaders
         Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, 60, 420, bounds.height - 100)
         invaderGroup = new InvaderGroup(invaderBounds)
-    }
+       }
     
     void handleEvent(Event event) {
         if(event.type == SWT.KeyDown) {
