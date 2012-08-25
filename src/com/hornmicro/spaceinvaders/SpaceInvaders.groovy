@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Event
 import org.eclipse.swt.widgets.Listener
 import org.eclipse.swt.widgets.Shell
 
-
 @CompileStatic
 class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     Canvas canvas
@@ -39,7 +38,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     Rectangle bounds
     boolean redraw = false
     long newLifeTime = 0
-    long lastTime = 0L
+    long lastTime = 0
     
     SpaceInvaders() {
         Display.setAppName("Space Invaders")
@@ -65,6 +64,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         // Add space ship
         Rectangle shipBounds = new Rectangle(bounds.width / 2 - 156, 0, 312, bounds.height)
         shipSprite = new ShipSprite(shipBounds)
+        
         
         // Add space invaders
         Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, 60, 420, bounds.height - 100)
@@ -102,7 +102,6 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         display.addFilter(SWT.KeyUp, this)
         
         shell = new Shell(display)
-        shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
         
         InputStream shellImageIS = getClass().getResourceAsStream("SpaceInvaders.png")
         shell.setImage(shellImageIS ? new Image(display, shellImageIS) : new Image(display, "gfx/SpaceInvaders.png"))
@@ -118,14 +117,29 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     }
     
     void paintControl(PaintEvent pe) {
-        if(shell && !shell.isDisposed())
-            draw()
+        if(shell && !shell.isDisposed()) {
+            GC gc = pe.gc
+            playerOneScoreSprite.draw(spriteSheet, gc)
+            playerTwoScoreSprite.draw(spriteSheet, gc)
+            earthSprite.draw(spriteSheet, gc)
+            baseSprite1.draw(spriteSheet, gc)
+            baseSprite2.draw(spriteSheet, gc)
+            baseSprite3.draw(spriteSheet, gc)
+            invaderGroup.draw(spriteSheet, gc)
+            shipSprite.draw(spriteSheet, gc)
+            BulletSprite.drawAll(spriteSheet, gc)
+        }
     }
     
+    long nanoTime() {
+        //return (System.currentTimeMillis() * 1_000_000) 
+        return System.nanoTime()
+    }
+    int count = 0
     void updateModel() {
         if(lastTime) {
-            long timePassed = System.nanoTime() - lastTime
-                
+            long timePassed = nanoTime() - lastTime
+            
             invaderGroup.move(timePassed, shipSprite.isStarting() || shipSprite.isExploding())
             shipSprite.move(timePassed)
             BulletSprite.moveAll(timePassed)
@@ -133,47 +147,23 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             redraw = true
 
             // Detect collisions
-            def time = System.nanoTime()
-            
             List sprites = [ shipSprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
             for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
                 sprite.explode()
             }
             
-            if(BulletSprite.bullets.size()) {
-                long test = TimeUnit.MILLISECONDS.convert(System.nanoTime() - time, TimeUnit.NANOSECONDS)
-                if(test > 10 )
-                    println( "${test.toString()} ms" )
-            }
-            
         }
         
-        lastTime = System.nanoTime()
+        lastTime = nanoTime()
     }
     
     void draw() {
-        if(!shell || shell.isDisposed()) return
-        GC gc = new GC(canvas)
-        gc.setInterpolation(SWT.NONE)
-        gc.fillRectangle(canvas.getClientArea())
-        
-        playerOneScoreSprite.draw(spriteSheet, gc)
-        playerTwoScoreSprite.draw(spriteSheet, gc)
-        earthSprite.draw(spriteSheet, gc)
-        baseSprite1.draw(spriteSheet, gc)
-        baseSprite2.draw(spriteSheet, gc)
-        baseSprite3.draw(spriteSheet, gc)
-        invaderGroup.draw(spriteSheet, gc)
-        shipSprite.draw(spriteSheet, gc)
-        BulletSprite.drawAll(spriteSheet, gc)
-        
-        gc.dispose()
+        if(!shell.isDisposed()) {
+            canvas.redraw()
+            canvas.update()
+        }
     }
-    
-    void playSounds() {
-        
-    }
-    
+     
     void gameLoop() {
         /*
          while( user doesn't exit )
@@ -183,16 +173,18 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
              play sounds
          end while
          */
-        
          shell.open()
          while (!shell.isDisposed()) {
-             long startTime = System.nanoTime()
+             long startTime = nanoTime()
              display.readAndDispatch()
+             
              updateModel()
              draw()
+             updateModel()
              
-             // Aim for 100fps (1s/100 frames = 10,000,000 ns / frame)
-             TimeUnit.NANOSECONDS.sleep(startTime + 20_000_000 - System.nanoTime())
+             // Aim for 50fps (1s/100 frames = 10,000,000 ns / frame)
+             long sleepTime = startTime + 20_000_000 - nanoTime()
+             TimeUnit.NANOSECONDS.sleep(sleepTime)
          }
          display.dispose()
     }
