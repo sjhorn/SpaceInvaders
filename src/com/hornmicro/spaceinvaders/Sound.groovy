@@ -21,10 +21,14 @@ class Sound implements LineListener {
     Clip clip
     
     Sound(String sound) {
-        File audio1 = new File(sound)
-        URL url = audio1.toURI().toURL()
+        InputStream soundInputStream = getClass().getResourceAsStream(sound)
+        if(soundInputStream == null) {
+            File audio1 = new File("sounds/${sound}")
+            URL url = audio1.toURI().toURL()
+            soundInputStream = url.openStream()
+        }
         
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(loadStream(url.openStream()))
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(loadStream(soundInputStream))
         AudioFormat af = audioInputStream.getFormat()
         int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength())
         
@@ -84,8 +88,6 @@ class Sound implements LineListener {
     
 
     static main(args) {
-        new Sound("sounds/shipfire.wav")
-        
         Display display = new Display();
         Shell shell = new Shell(display);
         shell.setLayout(new GridLayout(1, false));
@@ -94,11 +96,11 @@ class Sound implements LineListener {
         button.text = "Play"
         button.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent arg0) {
-                new Sound("sounds/shipfire.wav").play()
+                new Sound("shipfire.wav").play()
         
                 Thread.sleep(800)
                 
-                new Sound("sounds/invaderhit.wav").play()
+                new Sound("invaderhit.wav").play()
                 
                 Thread.sleep(1000)
             }
@@ -111,8 +113,7 @@ class Sound implements LineListener {
                 display.sleep();
         }
         display.dispose();
-        
-        //System.exit(0)
+        System.exit(0)
     }
 
     

@@ -8,7 +8,7 @@ import org.eclipse.swt.graphics.Rectangle
 
 @CompileStatic
 class ShipSprite extends Sprite {
-    static final Sound shiphit = new Sound("sounds/shiphit.wav")
+    static final Sound shiphit = new Sound("shiphit.wav")
     static final long STARTING_TIME = 2_000_000_000
     static final long EXPLODING_TIME = 1_200_000_000
     public boolean moveLeft = false

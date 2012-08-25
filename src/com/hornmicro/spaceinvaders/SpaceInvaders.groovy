@@ -46,7 +46,8 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         display = new Display()
         configureShell()
         
-        spriteSheet = new Image(display, "gfx/SpriteSheet.png")
+        InputStream imageInputStream = getClass().getResourceAsStream("SpriteSheet.png")
+        spriteSheet = (imageInputStream != null ? new Image(display, imageInputStream) : new Image(display, "gfx/SpriteSheet.png"))  
         bounds = shell.getClientArea()
         
         // Scores
@@ -102,7 +103,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         
         shell = new Shell(display)
         shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK))
-        shell.setImage(new Image(Display.getDefault(), "gfx/SpaceInvaders.png"))
+        
+        InputStream shellImageIS = getClass().getResourceAsStream("SpaceInvaders.png")
+        shell.setImage(shellImageIS ? new Image(display, shellImageIS) : new Image(display, "gfx/SpaceInvaders.png"))
         
         canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED)
         canvas.setBackground(display.getSystemColor(SWT.COLOR_BLACK))

@@ -10,7 +10,7 @@ class BulletSprite extends Sprite {
     enum TYPE { SHIP, INVADER }
     static public List<BulletSprite> bullets = []
     static public List<BulletSprite> bulletsToRemove = []
-    static final Sound shipfire = new Sound("sounds/shipfire.wav")
+    static final Sound shipfire = new Sound("shipfire.wav")
     public TYPE type
     
     BulletSprite(Rectangle bounds, DoubleRectangle location, TYPE type) {

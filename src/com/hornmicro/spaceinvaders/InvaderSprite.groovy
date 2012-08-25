@@ -8,7 +8,7 @@ import org.eclipse.swt.graphics.Rectangle
 
 @CompileStatic
 class InvaderSprite extends Sprite {
-    static final Sound invaderhit = new Sound("sounds/invaderhit.wav")
+    static final Sound invaderhit = new Sound("invaderhit.wav")
     InvaderSprite(int row, Rectangle bounds, DoubleRectangle location) {
         super(
             [ 
