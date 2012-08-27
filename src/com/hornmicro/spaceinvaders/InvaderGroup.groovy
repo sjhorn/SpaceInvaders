@@ -58,6 +58,9 @@ class InvaderGroup {
             }
             invaders.removeAll(invadersToRemove)
             invadersToRemove.clear()
+            if(invaders.size() == 0) {
+                invaderSound.stop()
+            }
             explosionTime = 0
         }
         if(!freeze) {
@@ -74,7 +77,7 @@ class InvaderGroup {
             }
             
             
-            if(moveTime > waitTime && location.bottom < 330) {
+            if(moveTime > waitTime) {
                 invaderSound.play()
                 location.left += dx
                 dy = 0
@@ -107,7 +110,6 @@ class InvaderGroup {
                 location.top = top
                 location.width = right - left
                 location.height = bottom - top
-                
                 moveTime = 0
             }
         }

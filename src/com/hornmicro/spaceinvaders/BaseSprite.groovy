@@ -1,5 +1,7 @@
 package com.hornmicro.spaceinvaders
 
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle
 
 class BaseSprite extends Sprite {
@@ -12,7 +14,14 @@ class BaseSprite extends Sprite {
         )
     }
     
-    void explode() {
-        // ignore for now
+    void draw(Image spriteSheet, GC gc) {
+        if(!hidden) {
+            super.draw(spriteSheet, gc)
+        }
     }
+    
+    void explode() {
+        // todo damage sprite here
+    }
+    
 }

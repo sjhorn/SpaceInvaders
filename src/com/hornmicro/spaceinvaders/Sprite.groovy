@@ -21,7 +21,8 @@ abstract class Sprite {
     Rectangle bounds
     double speedX // pixels / sec
     double speedY // pixels / sec
-    public boolean exploding = false
+    boolean exploding = false
+    boolean hidden = false
     
     public Sprite() {
     }
@@ -64,7 +65,7 @@ abstract class Sprite {
      * @param gc - the graphic context to draw to
      */
     void draw(Image spriteSheet, GC gc) {
-        if(gc.isDisposed()) return
+        if(gc.isDisposed() || hidden) return
         Rectangle frame = spriteFrames[frameIndex]
         if(frame) {
             gc.drawImage(spriteSheet,
@@ -124,4 +125,8 @@ abstract class Sprite {
     void explode() {
         exploding = true
     }
+    
+    void hide() {
+        hidden = true
+    }    
 }

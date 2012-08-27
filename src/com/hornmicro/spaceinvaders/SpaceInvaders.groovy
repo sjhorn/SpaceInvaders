@@ -2,6 +2,7 @@ package com.hornmicro.spaceinvaders
 
 import groovy.transform.CompileStatic
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit
 
 import org.codehaus.groovy.runtime.StackTraceUtils
@@ -36,8 +37,10 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     
     InvaderGroup invaderGroup
     Rectangle bounds
-    boolean redraw = false
-    long newLifeTime = 0
+    boolean gameOver = false
+    boolean aIEnabled = false
+    long gameOverTime = 0
+    long aiTime = 0
     long lastTime = 0
     
     SpaceInvaders() {
@@ -49,6 +52,10 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         spriteSheet = (imageInputStream != null ? new Image(display, imageInputStream) : new Image(display, "gfx/SpriteSheet.png"))  
         bounds = shell.getClientArea()
         
+        initSprites()
+    }
+    
+    void initSprites() {
         // Scores
         playerOneScoreSprite = new PlayerOneScoreSprite(bounds)
         playerTwoScoreSprite = new PlayerTwoScoreSprite(bounds)
@@ -69,7 +76,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         // Add space invaders
         Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, 60, 420, bounds.height - 100)
         invaderGroup = new InvaderGroup(invaderBounds)
-       }
+    }
     
     void handleEvent(Event event) {
         if(event.type == SWT.KeyDown) {
@@ -91,9 +98,20 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     shipSprite.moveRight = false
                     break
                 case SWT.ARROW_LEFT:
-                    shipSprite.moveLeft = false
+                    shipSprite.moveRight = false
                     break
-             }
+            }
+            
+            if(event.character == 'a') {
+                // Toggle AI
+                aIEnabled = !aIEnabled
+                println "AI is $aIEnabled"
+                if(!aIEnabled) {
+                    shipSprite.moveRight = false
+                    shipSprite.moveLeft = false
+                }
+            }
+            
         }
     }
     
@@ -135,21 +153,65 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         //return (System.currentTimeMillis() * 1_000_000) 
         return System.nanoTime()
     }
-    int count = 0
+    
     void updateModel() {
         if(lastTime) {
             long timePassed = nanoTime() - lastTime
             
-            invaderGroup.move(timePassed, shipSprite.isStarting() || shipSprite.isExploding())
-            shipSprite.move(timePassed)
-            BulletSprite.moveAll(timePassed)
+            // Check for game over otherwise update model
+            if(gameOver) {
+                gameOverTime += timePassed
+                if(gameOverTime > 3_000_000_000) {
+                    gameOver = false
+                    gameOverTime = 0
+                    initSprites()
+                }
+            } else {
+                invaderGroup.move(timePassed, shipSprite.isStarting() || shipSprite.isExploding())
+                
+                // If we are down to 0 lives or the vaders have reached earth its game over.
+                if(invaderGroup.location.bottom >= shipSprite.location.top || (shipSprite.lives == 0 && !shipSprite.isStarting()) ) {
+                    gameOver = true
+                    shipSprite.hide()
+                    
+                    shipSprite.shiphit.play()
+                } 
+                
+                if(invaderGroup.location.bottom >= baseSprite1.location.top) {
+                    baseSprite1.hide()
+                    baseSprite2.hide()
+                    baseSprite3.hide()
+                }
+                shipSprite.move(timePassed)
+                BulletSprite.moveAll(timePassed)
+                
+                // Detect collisions
+                List sprites = [ shipSprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
+                for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
+                    sprite.explode()
+                }
+            }
             
-            redraw = true
-
-            // Detect collisions
-            List sprites = [ shipSprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
-            for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
-                sprite.explode()
+            if(aIEnabled && !shipSprite.isStarting()) {
+                aiTime += timePassed
+                if(aiTime > 250_000_000) {
+                    Random r = new Random()
+                    int choice = r.nextInt(7)
+                    switch(choice) {
+                        case 1..2:
+                            shipSprite.moveRight = true
+                            break
+                        case 3:
+                            shipSprite.moveLeft = true
+                            break
+                        default:
+                            shipSprite.moveRight = false
+                            shipSprite.moveLeft = false
+                            BulletSprite.fireFromShip(shipSprite)
+                            break 
+                    }
+                    aiTime = 0
+                }
             }
             
         }
@@ -189,6 +251,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
          display.dispose()
     }
     
+    void widgetDisposed(DisposeEvent de) {
+        InvaderSprite.invaderhit.close()
+        BulletSprite.shipfire.close()
+        ShipSprite.shiphit.close()
+        InvaderGroup.invaderSound.close()
+    }
+
+    
     static main(args) {
         try {
             new SpaceInvaders().gameLoop()
@@ -202,12 +272,4 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             System.exit(0)
         }
     }
-
-    void widgetDisposed(DisposeEvent de) {
-        InvaderSprite.invaderhit.close()
-        BulletSprite.shipfire.close()
-        ShipSprite.shiphit.close()
-        InvaderGroup.invaderSound.close()
-    }
-
 }

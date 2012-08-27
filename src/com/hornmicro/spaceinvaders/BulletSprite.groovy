@@ -75,7 +75,7 @@ class BulletSprite extends Sprite {
                 if(sprite instanceof InvaderSprite && bullet.type == TYPE.INVADER) {
                     continue
                 }
-                if(!sprite.exploding && sprite.collidesWith(bullet)) {
+                if(!sprite.hidden && !sprite.exploding && sprite.collidesWith(bullet)) {
                     collisions.add(sprite)
                     collisions.add(bullet)
                 }

@@ -61,7 +61,9 @@ class ShipSprite extends Sprite {
     }
     
     boolean move(long timePassed) {
-        if(isStarting()) {
+        
+        // Show the starting state for 0 lives briefly before game over
+        if(isStarting() || lives < 1) {
             speedX = 0
             startingTime -= timePassed
             blinkFrameTime += timePassed
@@ -82,6 +84,7 @@ class ShipSprite extends Sprite {
                 if(lives > 0) lives--
             }
         } else {
+            
             frameIndex = 1
             if(moveLeft) {
                 speedX = -300
