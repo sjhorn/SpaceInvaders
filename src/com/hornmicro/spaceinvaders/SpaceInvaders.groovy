@@ -98,7 +98,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     shipSprite.moveRight = false
                     break
                 case SWT.ARROW_LEFT:
-                    shipSprite.moveRight = false
+                    shipSprite.moveLeft = false
                     break
             }
             
