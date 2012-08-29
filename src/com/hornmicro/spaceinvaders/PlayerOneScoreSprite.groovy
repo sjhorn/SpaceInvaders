@@ -8,6 +8,8 @@ import org.eclipse.swt.graphics.Rectangle
 
 @CompileStatic
 class PlayerOneScoreSprite extends Sprite {
+    int score = 0
+    
     PlayerOneScoreSprite(Rectangle bounds) {
         super(
             [ 
@@ -21,7 +23,7 @@ class PlayerOneScoreSprite extends Sprite {
                 new Rectangle(308, 80, 42, 20),
                 new Rectangle(352, 80, 42, 20),
                 new Rectangle(396, 80, 42, 20),
-                new Rectangle(440, 80, 42, 20) // 10
+                new Rectangle(440, 80, 42, 20) // 9
             ],
             bounds,
             new DoubleRectangle(15, 20, 240, 20)
@@ -30,8 +32,11 @@ class PlayerOneScoreSprite extends Sprite {
     
     void draw(Image spriteSheet, GC gc) {
         frameIndex = 0
+        String scoreString = String.format('%04d',score)
+        
         for(int index  : (0..3)) {
             location.left = 15 + index * 55
+            frameIndex = scoreString[index] as int
             super.draw(spriteSheet, gc)
         }
     }

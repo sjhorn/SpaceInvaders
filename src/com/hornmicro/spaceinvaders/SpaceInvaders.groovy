@@ -76,6 +76,8 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         // Add space invaders
         Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, 60, 420, bounds.height - 100)
         invaderGroup = new InvaderGroup(invaderBounds)
+        
+        BulletSprite.bullets.clear()
     }
     
     void handleEvent(Event event) {
@@ -105,11 +107,12 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             if(event.character == 'a') {
                 // Toggle AI
                 aIEnabled = !aIEnabled
-                println "AI is $aIEnabled"
                 if(!aIEnabled) {
                     shipSprite.moveRight = false
                     shipSprite.moveLeft = false
                 }
+            } else if (event.character == 'r') {
+                initSprites()
             }
             
         }
@@ -172,11 +175,12 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                 // If we are down to 0 lives or the vaders have reached earth its game over.
                 if(invaderGroup.location.bottom >= shipSprite.location.top || (shipSprite.lives == 0 && !shipSprite.isStarting()) ) {
                     gameOver = true
+                    BulletSprite.bullets.clear()
                     shipSprite.hide()
-                    
                     shipSprite.shiphit.play()
                 } 
                 
+                // Hide bases when the invaders reach them
                 if(invaderGroup.location.bottom >= baseSprite1.location.top) {
                     baseSprite1.hide()
                     baseSprite2.hide()
@@ -189,6 +193,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                 List sprites = [ shipSprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
                 for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
                     sprite.explode()
+                    if(sprite instanceof InvaderSprite) {
+                        playerOneScoreSprite.score += ((InvaderSprite)sprite).score
+                    }
                 }
             }
             
@@ -261,7 +268,11 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     
     static main(args) {
         try {
-            new SpaceInvaders().gameLoop()
+            SpaceInvaders spaceInvaders = new SpaceInvaders()
+            if(args?.find{it == '-a' }) {
+                spaceInvaders.aIEnabled = true
+            }
+            spaceInvaders.gameLoop()
         } catch(e) {
             StackTraceUtils.deepSanitize(e)
             e.printStackTrace()
