@@ -38,7 +38,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     
     InvaderGroup invaderGroup
     Rectangle bounds
-    boolean twoPlayer = true
+    boolean twoPlayer = false
     boolean gameOver = false
     boolean aIEnabled = false
     long gameOverTime = 0
@@ -180,7 +180,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             baseSprite3.draw(spriteSheet, gc)
             invaderGroup.draw(spriteSheet, gc)
             ship1Sprite.draw(spriteSheet, gc)
-            ship2Sprite.draw(spriteSheet, gc)
+            if(twoPlayer) {
+                ship2Sprite.draw(spriteSheet, gc)
+            }
             BulletSprite.drawAll(spriteSheet, gc)
         }
     }
@@ -220,7 +222,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     baseSprite3.hide()
                 }
                 ship1Sprite.move(timePassed)
-                ship2Sprite.move(timePassed)
+                if(twoPlayer) {
+                    ship2Sprite.move(timePassed)
+                }
                 BulletSprite.moveAll(timePassed)
                 
                 // Detect collisions
