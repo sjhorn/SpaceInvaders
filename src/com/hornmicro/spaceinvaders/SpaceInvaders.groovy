@@ -30,13 +30,15 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     BaseSprite baseSprite1
     BaseSprite baseSprite2
     BaseSprite baseSprite3
-    ShipSprite shipSprite
+    Ship1Sprite ship1Sprite
+    Ship2Sprite ship2Sprite
     EarthSprite earthSprite
     PlayerOneScoreSprite playerOneScoreSprite
     PlayerTwoScoreSprite playerTwoScoreSprite
     
     InvaderGroup invaderGroup
     Rectangle bounds
+    boolean twoPlayer = true
     boolean gameOver = false
     boolean aIEnabled = false
     long gameOverTime = 0
@@ -68,10 +70,13 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         baseSprite2 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 15,bounds.height - 110,31,36))
         baseSprite3 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100,bounds.height - 110,31,36))
         
-        // Add space ship
+        // Add space ship 1
         Rectangle shipBounds = new Rectangle(131, 0, 312, bounds.height)
-        shipSprite = new ShipSprite(shipBounds)
+        ship1Sprite = new Ship1Sprite(shipBounds)
         
+        if(twoPlayer) {
+            ship2Sprite = new Ship2Sprite(shipBounds)
+        }
         
         // Add space invaders
         Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, 60, 420, bounds.height - 100)
@@ -84,37 +89,64 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         if(event.type == SWT.KeyDown) {
             switch(event.keyCode) {
                case SWT.ARROW_RIGHT:
-                   shipSprite.moveRight = true
+                   ship1Sprite.moveRight = true
                    break
                case SWT.ARROW_LEFT:
-                   shipSprite.moveLeft = true
+                   ship1Sprite.moveLeft = true
                    break
                case SWT.SPACE:
                case 0x20:
-                   BulletSprite.fireFromShip(shipSprite)
+                   BulletSprite.fireFromShip(ship1Sprite)
                    break
             }
+            switch(event.character) {
+                case 'j':
+                    ship2Sprite.moveRight = true
+                    break
+                case 'g':
+                    ship2Sprite.moveLeft = true
+                    break
+                case 'f':
+                    BulletSprite.fireFromShip(ship2Sprite)
+                    break
+            }
+            
         } else if (event.type == SWT.KeyUp) {
             switch(event.keyCode) {
                 case SWT.ARROW_RIGHT:
-                    shipSprite.moveRight = false
+                    ship1Sprite.moveRight = false
                     break
                 case SWT.ARROW_LEFT:
-                    shipSprite.moveLeft = false
+                    ship1Sprite.moveLeft = false
                     break
             }
             
-            if(event.character == 'a') {
-                // Toggle AI
-                aIEnabled = !aIEnabled
-                if(!aIEnabled) {
-                    shipSprite.moveRight = false
-                    shipSprite.moveLeft = false
-                }
-            } else if (event.character == 'r') {
-                initSprites()
+            switch(event.character) {
+               case 'j':
+                   ship2Sprite.moveRight = false
+                   break
+               case 'g':
+                   ship2Sprite.moveLeft = false
+                   break
+                
+               case '3':
+                   // Toggle AI
+                   aIEnabled = !aIEnabled
+                   if(!aIEnabled) {
+                       ship1Sprite.moveRight = false
+                       ship1Sprite.moveLeft = false
+                   }
+                   break
+               case '1':
+                   twoPlayer = false
+                   initSprites()
+                   break
+               case '2':
+                   twoPlayer = true
+                   initSprites()
+                   break
+               
             }
-            
         }
     }
     
@@ -147,7 +179,8 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             baseSprite2.draw(spriteSheet, gc)
             baseSprite3.draw(spriteSheet, gc)
             invaderGroup.draw(spriteSheet, gc)
-            shipSprite.draw(spriteSheet, gc)
+            ship1Sprite.draw(spriteSheet, gc)
+            ship2Sprite.draw(spriteSheet, gc)
             BulletSprite.drawAll(spriteSheet, gc)
         }
     }
@@ -170,14 +203,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     initSprites()
                 }
             } else {
-                invaderGroup.move(timePassed, shipSprite.isStarting() || shipSprite.isExploding())
+                invaderGroup.move(timePassed, ship1Sprite.isStarting() || ship1Sprite.isExploding())
                 
                 // If we are down to 0 lives or the vaders have reached earth its game over.
-                if(invaderGroup.location.bottom >= shipSprite.location.top || (shipSprite.lives == 0 && !shipSprite.isStarting()) ) {
+                if(invaderGroup.location.bottom >= ship1Sprite.location.top || (ship1Sprite.lives == 0 && !ship1Sprite.isStarting()) ) {
                     gameOver = true
                     BulletSprite.bullets.clear()
-                    shipSprite.hide()
-                    shipSprite.shiphit.play()
+                    ship1Sprite.hide()
+                    ship1Sprite.shiphit.play()
                 } 
                 
                 // Hide bases when the invaders reach them
@@ -186,35 +219,44 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     baseSprite2.hide()
                     baseSprite3.hide()
                 }
-                shipSprite.move(timePassed)
+                ship1Sprite.move(timePassed)
+                ship2Sprite.move(timePassed)
                 BulletSprite.moveAll(timePassed)
                 
                 // Detect collisions
-                List sprites = [ shipSprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
+                List sprites = [ ship1Sprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
+                if(twoPlayer) {
+                    sprites.add(ship2Sprite)
+                }
                 for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
                     sprite.explode()
                     if(sprite instanceof InvaderSprite) {
-                        playerOneScoreSprite.score += ((InvaderSprite)sprite).score
+                        BulletSprite bullet = (BulletSprite) sprite.hitBy
+                        if(bullet.type == BulletSprite.TYPE.SHIP1) {
+                            playerOneScoreSprite.score += ((InvaderSprite)sprite).score
+                        } else {
+                            playerTwoScoreSprite.score += ((InvaderSprite)sprite).score
+                        }
                     }
                 }
             }
             
-            if(aIEnabled && !shipSprite.isStarting()) {
+            if(aIEnabled && !ship1Sprite.isStarting()) {
                 aiTime += timePassed
                 if(aiTime > 250_000_000) {
                     Random r = new Random()
                     int choice = r.nextInt(7)
                     switch(choice) {
                         case 1..2:
-                            shipSprite.moveRight = true
+                            ship1Sprite.moveRight = true
                             break
                         case 3:
-                            shipSprite.moveLeft = true
+                            ship1Sprite.moveLeft = true
                             break
                         default:
-                            shipSprite.moveRight = false
-                            shipSprite.moveLeft = false
-                            BulletSprite.fireFromShip(shipSprite)
+                            ship1Sprite.moveRight = false
+                            ship1Sprite.moveLeft = false
+                            BulletSprite.fireFromShip(ship1Sprite)
                             break 
                     }
                     aiTime = 0
@@ -261,7 +303,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     void widgetDisposed(DisposeEvent de) {
         InvaderSprite.invaderhit.close()
         BulletSprite.shipfire.close()
-        ShipSprite.shiphit.close()
+        Ship1Sprite.shiphit.close()
         InvaderGroup.invaderSound.close()
     }
 

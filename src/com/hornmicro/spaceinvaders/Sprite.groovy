@@ -23,6 +23,7 @@ abstract class Sprite {
     double speedY // pixels / sec
     boolean exploding = false
     boolean hidden = false
+    Sprite hitBy
     
     public Sprite() {
     }

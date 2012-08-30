@@ -2,12 +2,12 @@ package com.hornmicro.spaceinvaders
 
 import groovy.transform.CompileStatic
 
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.GC
+import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.graphics.Rectangle
 
 @CompileStatic
-class ShipSprite extends Sprite {
+abstract class ShipSprite extends Sprite {
     static final Sound shiphit = new Sound("shiphit.wav")
     static final long STARTING_TIME = 2_000_000_000
     static final long EXPLODING_TIME = 1_200_000_000
@@ -22,22 +22,8 @@ class ShipSprite extends Sprite {
     int lives = 3
     List<Rectangle> lifeRectangles
     
-    
-    ShipSprite(Rectangle bounds) {
-        super(
-            [
-                new Rectangle(128,60,25,20),  // Blank
-                new Rectangle(3,60,25,20),    // Normal 
-                new Rectangle(34,60,25,20), new Rectangle(66,60,25,20) // Explosion
-            ],
-            bounds, new DoubleRectangle(bounds.x,bounds.height-50,25,20)
-        )
-        lifeRectangles = [
-            new Rectangle(133, 120, 42, 20),
-            new Rectangle(88, 120, 42, 20),
-            new Rectangle(43, 120, 42, 20),
-            new Rectangle(0, 120, 42, 20)
-        ]
+    ShipSprite(List<Rectangle> rects, Rectangle rect, DoubleRectangle drect) {
+        super(rects, rect, drect)
     }
     
     void nextState() {
@@ -99,7 +85,6 @@ class ShipSprite extends Sprite {
     }
     
     void newLife() {
-        location.left = bounds.x
         exploding = false
         frameIndex = 0
         startingTime = STARTING_TIME

@@ -7,16 +7,16 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle
 
 class BulletSprite extends Sprite {
-    enum TYPE { SHIP, INVADER }
+    enum TYPE { SHIP1, SHIP2,  INVADER }
     static public List<BulletSprite> bullets = []
     static public List<BulletSprite> bulletsToRemove = []
     static final Sound shipfire = new Sound("shipfire.wav")
     public TYPE type
     
     BulletSprite(Rectangle bounds, DoubleRectangle location, TYPE type) {
-        super(new Rectangle(96, 60, 3, 16), bounds, location)
+        super(new Rectangle(96, 39, 3, 16), bounds, location)
         this.type = type
-        this.speedY = type == TYPE.SHIP ? -200d : 200d
+        this.speedY = (type == TYPE.SHIP1 || type == TYPE.SHIP2) ? -200d : 200d
     }
     
     static void fireFromInvader(Sprite invader) {
@@ -32,9 +32,10 @@ class BulletSprite extends Sprite {
     }
     
     static void fireFromShip(ShipSprite ship) {
+        TYPE type = (ship instanceof Ship1Sprite ? TYPE.SHIP1 : TYPE.SHIP2)
         
         // Only create a new bullet if the last one is gone!
-        if(!ship.exploding && ! ship.starting && ! bullets.type.find { it == TYPE.SHIP } ) {
+        if(!ship.exploding && ! ship.starting && ! bullets.type.find { it == type } ) {
             DoubleRectangle shipLoc = ship.location
             DoubleRectangle location = new DoubleRectangle(
                 shipLoc.left + shipLoc.width / 2 - 1.5d,
@@ -43,7 +44,7 @@ class BulletSprite extends Sprite {
                 16d
             )
             Rectangle bounds = new Rectangle(ship.bounds.x, ship.bounds.y-16, ship.bounds.width, ship.bounds.height+32)
-            bullets.add(new BulletSprite(bounds, location, TYPE.SHIP))
+            bullets.add(new BulletSprite(bounds, location, type))
             shipfire.play()
         }    
     }
@@ -76,6 +77,7 @@ class BulletSprite extends Sprite {
                     continue
                 }
                 if(!sprite.hidden && !sprite.exploding && sprite.collidesWith(bullet)) {
+                    sprite.hitBy = bullet
                     collisions.add(sprite)
                     collisions.add(bullet)
                 }
