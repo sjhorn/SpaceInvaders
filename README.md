@@ -38,3 +38,30 @@ j - right
 4 - Toggle invincible bullets.
 x - Destroy all invaders (for testing and humour)
 ````
+
+
+## Build,run and package source
+
+###Build
+Clone the repo and run the following:
+````
+ant build
+````
+
+###Run source
+````
+ant run
+````
+
+###Package into runnable jar
+
+````
+ant package
+````
+
+This jar is then available in the `dist/SpaceInvaders.jar` file. This can be run on most OSX, Linux and Windows using
+````
+java -XstartOnFirstThread -jar SpaceInvaders.jar
+````
+On linux and windows you should be able to double click that jar
+
