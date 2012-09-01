@@ -79,7 +79,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             }
         }
 
-                // Add bases
+        // Add bases
         def baseY = bounds.height/2 + 110
         baseSprite1 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 130, baseY, 31,36))
         baseSprite2 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 15, baseY, 31,36))
@@ -190,8 +190,8 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         shell.addDisposeListener(this)
         shell.setLayout(new FillLayout())
         
-        //shell.setSize(576,440)
-        shell.setSize(1200, 900)
+        shell.setSize(576,440)
+        //shell.setSize(1200, 900)
 
         shell.layout()
     }
