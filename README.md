@@ -1,5 +1,7 @@
 #Groovy Space Invaders
 
+![Groovy Space Invaders](https://github.com/sjhorn/SpaceInvaders/raw/master/gfx/GroovySpaceInvader.png)
+
 ## Download:
 
 <https://github.com/downloads/sjhorn/SpaceInvaders/SpaceInvaders.jar>
