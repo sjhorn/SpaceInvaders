@@ -16,7 +16,7 @@ class Ship2Sprite extends ShipSprite {
                 new Rectangle(96,60,25,20),    // Normal 
                 new Rectangle(128,60,25,20), new Rectangle(160,60,25,20) // Explosion
             ],
-            bounds, new DoubleRectangle(bounds.x + bounds.width-25,bounds.height-50,25,20)
+            bounds, new DoubleRectangle(bounds.x + bounds.width-25, bounds.height/2 + 440/2 - 50, 25,20)
         )
         lifeRectangles = [
             new Rectangle(133, 120, 42, 20),
@@ -26,8 +26,7 @@ class Ship2Sprite extends ShipSprite {
         ]
     }
     
-    void newLife() {
+    void positionShip() {
         location.left = bounds.x + bounds.width-25
-        super.newLife()
     }
 }

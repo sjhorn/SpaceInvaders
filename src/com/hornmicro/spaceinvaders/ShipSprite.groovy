@@ -36,17 +36,18 @@ abstract class ShipSprite extends Sprite {
     }
     
     void draw(Image spriteSheet, GC gc) {
-        super.draw(spriteSheet, gc)
-        
         if(isStarting()) {
             Rectangle l = lifeRectangles[lives]
             gc.drawImage(spriteSheet,
                 l.x, l.y, l.width, l.height,
                 (bounds.x+ bounds.width/2 + 20) as int, location.top as int, 42, 20)
+            super.draw(spriteSheet, gc)
+        } else if (lives > 0) {
+            super.draw(spriteSheet, gc)
         }
     }
     
-    boolean move(long timePassed) {
+    boolean move(long timePassed, boolean freeze) {
         
         // Show the starting state for 0 lives briefly before game over
         if(isStarting() || lives < 1) {
@@ -69,8 +70,9 @@ abstract class ShipSprite extends Sprite {
                 newLife()
                 if(lives > 0) lives--
             }
+        } else if(freeze) {
+            return false 
         } else {
-            
             frameIndex = 1
             if(moveLeft) {
                 speedX = -300
@@ -80,11 +82,21 @@ abstract class ShipSprite extends Sprite {
                 speedX = 0
                 return false
             }
-        }
+        } 
         return super.move(timePassed)
     }
     
+    void positionShip() {
+        
+    }
+    
+    void newLevel() {
+        positionShip()
+        startingTime = STARTING_TIME
+    }
+    
     void newLife() {
+        positionShip()
         exploding = false
         frameIndex = 0
         startingTime = STARTING_TIME

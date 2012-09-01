@@ -26,7 +26,7 @@ class PlayerOneScoreSprite extends Sprite {
                 new Rectangle(440, 80, 42, 20) // 9
             ],
             bounds,
-            new DoubleRectangle(15, 20, 240, 20)
+            new DoubleRectangle(15, bounds.y + 20, 240, 20)
         )
     }
     
@@ -35,7 +35,7 @@ class PlayerOneScoreSprite extends Sprite {
         String scoreString = String.format('%04d',score)
         
         for(int index  : (0..3)) {
-            location.left = 15 + index * 55
+            location.left = bounds.x + 15 + index * 55
             frameIndex = scoreString[index] as int
             super.draw(spriteSheet, gc)
         }

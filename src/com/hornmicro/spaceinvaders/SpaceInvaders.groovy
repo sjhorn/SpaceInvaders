@@ -38,12 +38,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     
     InvaderGroup invaderGroup
     Rectangle bounds
+    boolean paused = false
     boolean twoPlayer = false
     boolean gameOver = false
     boolean aIEnabled = false
     long gameOverTime = 0
     long aiTime = 0
     long lastTime = 0
+    int level = 0
     
     SpaceInvaders() {
         Display.setAppName("Space Invaders")
@@ -54,33 +56,40 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         spriteSheet = (imageInputStream != null ? new Image(display, imageInputStream) : new Image(display, "gfx/SpriteSheet.png"))  
         bounds = shell.getClientArea()
         
-        initSprites()
+        startLevel()
     }
     
-    void initSprites() {
-        // Scores
-        playerOneScoreSprite = new PlayerOneScoreSprite(bounds)
-        playerTwoScoreSprite = new PlayerTwoScoreSprite(bounds)
+    void startLevel() {
         
-        // Add Earth
-        earthSprite = new EarthSprite(bounds)
-        
-        // Add bases
-        baseSprite1 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 130,bounds.height - 110,31,36))
-        baseSprite2 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 15,bounds.height - 110,31,36))
-        baseSprite3 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100,bounds.height - 110,31,36))
-        
-        // Add space ship 1
-        Rectangle shipBounds = new Rectangle(131, 0, 312, bounds.height)
-        ship1Sprite = new Ship1Sprite(shipBounds)
-        
-        if(twoPlayer) {
-            ship2Sprite = new Ship2Sprite(shipBounds)
+        // Add Players
+        if(level == 0) {
+            
+            // Scores
+            Rectangle scoreBounds = new Rectangle((bounds.width / 2 - 288) as int, (bounds.height / 2 - 220) as int, 576, 440)
+            playerOneScoreSprite = new PlayerOneScoreSprite(scoreBounds)
+            playerTwoScoreSprite = new PlayerTwoScoreSprite(scoreBounds)
+            
+            // Add Earth
+            earthSprite = new EarthSprite(bounds)
+            
+            Rectangle shipBounds = new Rectangle(bounds.width/2 - 312/2, 0, 312, bounds.height)
+            ship1Sprite = new Ship1Sprite(shipBounds)
+            if(twoPlayer) {
+                ship2Sprite = new Ship2Sprite(shipBounds)
+            }
         }
+
+                // Add bases
+        def baseY = bounds.height/2 + 110
+        baseSprite1 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 130, baseY, 31,36))
+        baseSprite2 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 15, baseY, 31,36))
+        baseSprite3 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100, baseY, 31,36))
         
         // Add space invaders
-        Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, 60, 420, bounds.height - 100)
-        invaderGroup = new InvaderGroup(invaderBounds)
+        def vaderOffset = (level % 5) * 22  
+        Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, bounds.height/2 - 160 + vaderOffset, 420, 396 - vaderOffset)
+        def vaderSpeed = 700_000_000 - (level % 10) * 45_000_000
+        invaderGroup = new InvaderGroup(invaderBounds, vaderSpeed)
         
         BulletSprite.bullets.clear()
     }
@@ -129,6 +138,15 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                    ship2Sprite.moveLeft = false
                    break
                 
+               case '1':
+                   twoPlayer = false
+                   startLevel()
+                   break
+               case '2':
+                   twoPlayer = true
+                   startLevel()
+                   break
+                   
                case '3':
                    // Toggle AI
                    aIEnabled = !aIEnabled
@@ -137,13 +155,19 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                        ship1Sprite.moveLeft = false
                    }
                    break
-               case '1':
-                   twoPlayer = false
-                   initSprites()
+               case '4':
+                   BulletSprite.powerMode = !BulletSprite.powerMode 
                    break
-               case '2':
-                   twoPlayer = true
-                   initSprites()
+                   
+               case 'x':
+                   for(Sprite invader: invaderGroup.invaders) {
+                       playerOneScoreSprite.score += invader.score
+                       invader.explode()
+                   }
+                   break
+                   
+               case 'p':
+                   paused = !paused
                    break
                
             }
@@ -165,8 +189,11 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         
         shell.addDisposeListener(this)
         shell.setLayout(new FillLayout())
+        
+        //shell.setSize(576,440)
+        shell.setSize(1200, 900)
+
         shell.layout()
-        shell.setSize(576,440)
     }
     
     void paintControl(PaintEvent pe) {
@@ -175,6 +202,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             playerOneScoreSprite.draw(spriteSheet, gc)
             playerTwoScoreSprite.draw(spriteSheet, gc)
             earthSprite.draw(spriteSheet, gc)
+            
+            // Hide bases when the invaders reach them
+            if(invaderGroup.location.bottom >= baseSprite1.location.top) {
+                baseSprite1.hide()
+                baseSprite2.hide()
+                baseSprite3.hide()
+            }
+            
             baseSprite1.draw(spriteSheet, gc)
             baseSprite2.draw(spriteSheet, gc)
             baseSprite3.draw(spriteSheet, gc)
@@ -188,12 +223,32 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     }
     
     long nanoTime() {
-        //return (System.currentTimeMillis() * 1_000_000) 
         return System.nanoTime()
     }
     
+    void doGameOver() {
+        
+        // If we are down to 0 lives or the vaders have reached earth its game over.
+        gameOver = true
+        level = 0
+        BulletSprite.bullets.clear()
+        ship1Sprite.hide()
+        if(twoPlayer) {
+            ship2Sprite.hide()
+        }
+    }
+    
+    void newLevel() {
+        level++
+        startLevel()
+        ship1Sprite.newLevel()
+        if(twoPlayer) {
+            ship2Sprite.newLevel()
+        }
+    }
+    
     void updateModel() {
-        if(lastTime) {
+        if(lastTime && !paused) {
             long timePassed = nanoTime() - lastTime
             
             // Check for game over otherwise update model
@@ -202,50 +257,58 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                 if(gameOverTime > 3_000_000_000) {
                     gameOver = false
                     gameOverTime = 0
-                    initSprites()
+                    startLevel()
                 }
             } else {
-                invaderGroup.move(timePassed, ship1Sprite.isStarting() || ship1Sprite.isExploding())
+                boolean freeze = (ship1Sprite.isStarting() || ship1Sprite.isExploding()) ||
+                    (twoPlayer && (ship2Sprite.isStarting() || ship2Sprite.isExploding())) 
                 
-                // If we are down to 0 lives or the vaders have reached earth its game over.
-                if(invaderGroup.location.bottom >= ship1Sprite.location.top || (ship1Sprite.lives == 0 && !ship1Sprite.isStarting()) ) {
-                    gameOver = true
-                    BulletSprite.bullets.clear()
-                    ship1Sprite.hide()
+                invaderGroup.move(timePassed, freeze)
+                ship1Sprite.move(timePassed, freeze)
+                if(twoPlayer) {
+                    ship2Sprite.move(timePassed, freeze)
+                }
+                
+                if(freeze) {
+                    // Do nothing
+                } else if(invaderGroup.invaders.size() == 0) {
+                    newLevel()
+                } else if( invaderGroup.location.bottom >= ship1Sprite.location.top){
+                    doGameOver()
                     ship1Sprite.shiphit.play()
-                } 
-                
-                // Hide bases when the invaders reach them
-                if(invaderGroup.location.bottom >= baseSprite1.location.top) {
-                    baseSprite1.hide()
-                    baseSprite2.hide()
-                    baseSprite3.hide()
-                }
-                ship1Sprite.move(timePassed)
-                if(twoPlayer) {
-                    ship2Sprite.move(timePassed)
-                }
-                BulletSprite.moveAll(timePassed)
-                
-                // Detect collisions
-                List sprites = [ ship1Sprite, invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
-                if(twoPlayer) {
-                    sprites.add(ship2Sprite)
-                }
-                for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
-                    sprite.explode()
-                    if(sprite instanceof InvaderSprite) {
-                        BulletSprite bullet = (BulletSprite) sprite.hitBy
-                        if(bullet.type == BulletSprite.TYPE.SHIP1) {
-                            playerOneScoreSprite.score += ((InvaderSprite)sprite).score
-                        } else {
-                            playerTwoScoreSprite.score += ((InvaderSprite)sprite).score
+                } else if ((!twoPlayer && ship1Sprite.lives < 1) || (ship1Sprite.lives < 1 && ship2Sprite.lives < 1)) {
+                    doGameOver()
+                } else {
+                    BulletSprite.moveAll(timePassed)
+                    
+                    // Detect collisions
+                    List sprites = [ invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
+                    
+                    if(ship1Sprite.lives > 0) {
+                        sprites.add(ship1Sprite)
+                    }
+                    if(twoPlayer && ship2Sprite.lives > 0) {
+                        sprites.add(ship2Sprite)
+                    }
+                    
+                    for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
+                        sprite.explode()
+                        if(sprite instanceof InvaderSprite) {
+                            BulletSprite bullet = (BulletSprite) sprite.hitBy
+                            if(bullet.type == BulletSprite.TYPE.SHIP1) {
+                                playerOneScoreSprite.score += ((InvaderSprite)sprite).score
+                            } else {
+                                playerTwoScoreSprite.score += ((InvaderSprite)sprite).score
+                            }
+                        } else if(sprite instanceof ShipSprite) {
+                            BulletSprite.bullets.clear()
                         }
+                        
                     }
                 }
             }
             
-            if(aIEnabled && !ship1Sprite.isStarting()) {
+            if(aIEnabled) {
                 aiTime += timePassed
                 if(aiTime > 250_000_000) {
                     Random r = new Random()
@@ -280,14 +343,6 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     }
      
     void gameLoop() {
-        /*
-         while( user doesn't exit )
-             check for user input
-             update model
-             draw graphics
-             play sounds
-         end while
-         */
          shell.open()
          while (!shell.isDisposed()) {
              long startTime = nanoTime()

@@ -8,7 +8,7 @@ class EarthSprite extends Sprite {
         super(
             new Rectangle(0, 160, 576, 30),
             bounds,
-            new DoubleRectangle(0, bounds.height-30, 576, 30)
+            new DoubleRectangle(bounds.width/2 - 576/2, bounds.height/2 + 440/2 - 30, 576, 30)
         )
     }    
 }

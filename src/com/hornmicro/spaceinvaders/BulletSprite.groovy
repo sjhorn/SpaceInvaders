@@ -12,6 +12,7 @@ class BulletSprite extends Sprite {
     static public List<BulletSprite> bulletsToRemove = []
     static final Sound shipfire = new Sound("shipfire.wav")
     public TYPE type
+    static boolean powerMode = false
     
     BulletSprite(Rectangle bounds, DoubleRectangle location, TYPE type) {
         super(new Rectangle(96, 39, 3, 16), bounds, location)
@@ -27,15 +28,16 @@ class BulletSprite extends Sprite {
             3d,
             16d
         )
-        Rectangle bounds = new Rectangle(invader.bounds.x, invader.bounds.y-16, invader.bounds.width, invader.bounds.height+32)
+        Rectangle bounds = new Rectangle(invader.bounds.x, invader.bounds.y-16, invader.bounds.width, invader.bounds.height-30)
         bullets.add(new BulletSprite(bounds, location, TYPE.INVADER))
     }
     
     static void fireFromShip(ShipSprite ship) {
+        if(ship.lives < 1) return
         TYPE type = (ship instanceof Ship1Sprite ? TYPE.SHIP1 : TYPE.SHIP2)
         
         // Only create a new bullet if the last one is gone!
-        if(!ship.exploding && ! ship.starting && ! bullets.type.find { it == type } ) {
+        if(!ship.exploding && ! ship.starting && (powerMode || ! bullets.type.find { it == type })) {
             DoubleRectangle shipLoc = ship.location
             DoubleRectangle location = new DoubleRectangle(
                 shipLoc.left + shipLoc.width / 2 - 1.5d,
@@ -43,7 +45,7 @@ class BulletSprite extends Sprite {
                 3d,
                 16d
             )
-            Rectangle bounds = new Rectangle(ship.bounds.x, ship.bounds.y-16, ship.bounds.width, ship.bounds.height+32)
+            Rectangle bounds = new Rectangle(ship.bounds.x, (ship.bounds.height/2 - 180) as int, ship.bounds.width, 400)
             bullets.add(new BulletSprite(bounds, location, type))
             shipfire.play()
         }    
@@ -100,6 +102,10 @@ class BulletSprite extends Sprite {
     }
     
     void explode() {
-        BulletSprite.bullets.remove(this)
+        if(powerMode && (type == TYPE.SHIP1 || type == TYPE.SHIP2)) {
+            
+        } else {
+            BulletSprite.bullets.remove(this)
+        }
     }
 }
