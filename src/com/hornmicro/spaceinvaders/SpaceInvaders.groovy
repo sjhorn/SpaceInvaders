@@ -86,13 +86,18 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         baseSprite3 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100, baseY, 31,36))
         
         // Add space invaders
-        def vaderOffset = (level % 5) * 22  
+        def vaderOffset = (level % 6) * 22  
         Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, bounds.height/2 - 160 + vaderOffset, 420, 396 - vaderOffset)
-        def vaderSpeed = 700_000_000 - (level % 10) * 45_000_000
+        def vaderSpeed = 700_000_000 - (level % 12) * 45_000_000
         invaderGroup = new InvaderGroup(invaderBounds, vaderSpeed)
         
         BulletSprite.bullets.clear()
     }
+    
+    boolean isFrozen() {
+        return  (ship1Sprite.isStarting() || ship1Sprite.isExploding()) ||
+            (twoPlayer && (ship2Sprite.isStarting() || ship2Sprite.isExploding()))
+    } 
     
     void handleEvent(Event event) {
         if(event.type == SWT.KeyDown) {
@@ -105,7 +110,8 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                    break
                case SWT.SPACE:
                case 0x20:
-                   BulletSprite.fireFromShip(ship1Sprite)
+                   if(!isFrozen())
+                       BulletSprite.fireFromShip(ship1Sprite)
                    break
             }
             switch(event.character) {
@@ -116,7 +122,8 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     ship2Sprite.moveLeft = true
                     break
                 case 'f':
-                    BulletSprite.fireFromShip(ship2Sprite)
+                    if(!isFrozen())
+                        BulletSprite.fireFromShip(ship2Sprite)
                     break
             }
             
@@ -139,10 +146,12 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                    break
                 
                case '1':
+                   level = 0
                    twoPlayer = false
                    startLevel()
                    break
                case '2':
+                   level = 0
                    twoPlayer = true
                    startLevel()
                    break
@@ -241,8 +250,10 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     void newLevel() {
         level++
         startLevel()
-        ship1Sprite.newLevel()
-        if(twoPlayer) {
+        if(ship1Sprite.lives) {
+            ship1Sprite.newLevel()
+        }
+        if(twoPlayer && ship2Sprite.lives) {
             ship2Sprite.newLevel()
         }
     }
@@ -308,7 +319,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                 }
             }
             
-            if(aIEnabled) {
+            if(aIEnabled && !isFrozen()) {
                 aiTime += timePassed
                 if(aiTime > 250_000_000) {
                     Random r = new Random()

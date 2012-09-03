@@ -71,6 +71,7 @@ abstract class ShipSprite extends Sprite {
                 if(lives > 0) lives--
             }
         } else if(freeze) {
+            positionShip()
             return false 
         } else {
             frameIndex = 1
