@@ -7,7 +7,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle
 
 @CompileStatic
-class InvaderSprite extends Sprite {
+class InvaderSprite extends ScoringSprite {
     int score
     static final Sound invaderhit = new Sound("invaderhit.wav")
     InvaderSprite(int row, Rectangle bounds, DoubleRectangle location) {
@@ -20,6 +20,10 @@ class InvaderSprite extends Sprite {
             bounds, location, 5d, 0d
         )
         score = 30 - row * 5
+    }
+    
+    InvaderSprite() {
+        
     }
     
     void nextState() {

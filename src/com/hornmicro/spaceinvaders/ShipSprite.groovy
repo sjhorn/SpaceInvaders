@@ -84,7 +84,7 @@ abstract class ShipSprite extends Sprite {
                 return false
             }
         } 
-        return super.move(timePassed)
+        return super.move(timePassed, true)
     }
     
     void positionShip() {

@@ -2,7 +2,6 @@ package com.hornmicro.spaceinvaders
 
 import groovy.transform.CompileStatic
 
-import java.util.Random;
 import java.util.concurrent.TimeUnit
 
 import org.codehaus.groovy.runtime.StackTraceUtils
@@ -37,14 +36,19 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     PlayerTwoScoreSprite playerTwoScoreSprite
     
     InvaderGroup invaderGroup
+    CommandShipSprite commandShipSprite
+    
     Rectangle bounds
     boolean paused = false
     boolean twoPlayer = false
     boolean gameOver = false
     boolean aIEnabled = false
+    
     long gameOverTime = 0
     long aiTime = 0
     long lastTime = 0
+    long commandShipTime = 0
+    
     int level = 0
     
     SpaceInvaders() {
@@ -92,6 +96,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         invaderGroup = new InvaderGroup(invaderBounds, vaderSpeed)
         
         BulletSprite.bullets.clear()
+        commandShipSprite?.hide()
     }
     
     boolean isFrozen() {
@@ -110,8 +115,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                    break
                case SWT.SPACE:
                case 0x20:
-                   if(!isFrozen())
+                   if(!isFrozen()) {
                        BulletSprite.fireFromShip(ship1Sprite)
+                   }
                    break
             }
             switch(event.character) {
@@ -122,8 +128,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     ship2Sprite.moveLeft = true
                     break
                 case 'f':
-                    if(!isFrozen())
+                    if(!isFrozen()) {
                         BulletSprite.fireFromShip(ship2Sprite)
+                    }
                     break
             }
             
@@ -173,6 +180,10 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                        playerOneScoreSprite.score += invader.score
                        invader.explode()
                    }
+                   if(commandShipSprite && !commandShipSprite.isHidden()) {
+                       playerOneScoreSprite.score += commandShipSprite.score
+                       commandShipSprite.explode()
+                   }
                    break
                    
                case 'p':
@@ -208,8 +219,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     void paintControl(PaintEvent pe) {
         if(shell && !shell.isDisposed()) {
             GC gc = pe.gc
-            playerOneScoreSprite.draw(spriteSheet, gc)
-            playerTwoScoreSprite.draw(spriteSheet, gc)
+            
             earthSprite.draw(spriteSheet, gc)
             
             // Hide bases when the invaders reach them
@@ -223,11 +233,20 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             baseSprite2.draw(spriteSheet, gc)
             baseSprite3.draw(spriteSheet, gc)
             invaderGroup.draw(spriteSheet, gc)
+            if(commandShipSprite && !commandShipSprite.isHidden()) {
+                commandShipSprite.draw(spriteSheet, gc)
+            }
+            
             ship1Sprite.draw(spriteSheet, gc)
             if(twoPlayer) {
                 ship2Sprite.draw(spriteSheet, gc)
             }
             BulletSprite.drawAll(spriteSheet, gc)
+            
+            if(!commandShipSprite || commandShipSprite.isHidden()) {
+                playerOneScoreSprite.draw(spriteSheet, gc)
+                playerTwoScoreSprite.draw(spriteSheet, gc)
+            }
         }
     }
     
@@ -271,10 +290,12 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     startLevel()
                 }
             } else {
-                boolean freeze = (ship1Sprite.isStarting() || ship1Sprite.isExploding()) ||
-                    (twoPlayer && (ship2Sprite.isStarting() || ship2Sprite.isExploding())) 
+                boolean freeze = isFrozen() 
                 
                 invaderGroup.move(timePassed, freeze)
+                if(!freeze) {
+                    commandShipSprite?.move(timePassed)
+                }
                 ship1Sprite.move(timePassed, freeze)
                 if(twoPlayer) {
                     ship2Sprite.move(timePassed, freeze)
@@ -290,6 +311,17 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                 } else if ((!twoPlayer && ship1Sprite.lives < 1) || (ship1Sprite.lives < 1 && ship2Sprite.lives < 1)) {
                     doGameOver()
                 } else {
+                    
+                    // Command Ship
+                    commandShipTime += timePassed
+                    if(commandShipTime > 10_000_000_000) {
+                        commandShipTime = 0
+                        if(!commandShipSprite || commandShipSprite.isHidden()) {
+                            commandShipSprite = new CommandShipSprite(bounds)
+                        }
+                    }    
+                
+                    // Move bullets
                     BulletSprite.moveAll(timePassed)
                     
                     // Detect collisions
@@ -301,15 +333,18 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     if(twoPlayer && ship2Sprite.lives > 0) {
                         sprites.add(ship2Sprite)
                     }
+                    if(commandShipSprite && !commandShipSprite.isHidden()) {
+                        sprites.add(commandShipSprite)
+                    }
                     
                     for(Sprite sprite: BulletSprite.detectCollisions(sprites)) {
                         sprite.explode()
-                        if(sprite instanceof InvaderSprite) {
+                        if(sprite instanceof ScoringSprite) {
                             BulletSprite bullet = (BulletSprite) sprite.hitBy
                             if(bullet.type == BulletSprite.TYPE.SHIP1) {
-                                playerOneScoreSprite.score += ((InvaderSprite)sprite).score
+                                playerOneScoreSprite.score += ((ScoringSprite)sprite).score
                             } else {
-                                playerTwoScoreSprite.score += ((InvaderSprite)sprite).score
+                                playerTwoScoreSprite.score += ((ScoringSprite)sprite).score
                             }
                         } else if(sprite instanceof ShipSprite) {
                             BulletSprite.bullets.clear()
@@ -375,6 +410,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         BulletSprite.shipfire.close()
         Ship1Sprite.shiphit.close()
         InvaderGroup.invaderSound.close()
+        CommandShipSprite.commandshiphit.close()
     }
 
     

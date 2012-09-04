@@ -81,20 +81,20 @@ abstract class Sprite {
      * @param timePassed - the time passed in nanoseconds since the last movement
      * @return - return true if redraw is required
      */
-    boolean move(long timePassed) {
+    boolean move(long timePassed, boolean stayWithinBounds = true) {
         location.left += (speedX ? ((timePassed * speedX) / 1_000_000_000) : 0d) 
         int maxX = bounds.x + bounds.width
-        if(location.right > maxX) {
+        if(location.right > maxX && stayWithinBounds) {
             location.left = maxX - location.width
-        } else if (location.left < bounds.x) {
+        } else if (location.left < bounds.x && stayWithinBounds) {
             location.left = bounds.x
         }
         
         location.top += (speedY ? ((timePassed * speedY) / 1_000_000_000) : 0d)
         int maxY = bounds.y + bounds.height
-        if(location.bottom > maxY) {
+        if(location.bottom > maxY  && stayWithinBounds) {
             location.top = maxY - location.height   
-        } else if (location.top < bounds.y) {
+        } else if (location.top < bounds.y && stayWithinBounds) {
             location.top = bounds.y
         }
         return true

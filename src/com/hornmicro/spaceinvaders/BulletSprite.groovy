@@ -45,7 +45,7 @@ class BulletSprite extends Sprite {
                 3d,
                 16d
             )
-            Rectangle bounds = new Rectangle(ship.bounds.x, (ship.bounds.height/2 - 180) as int, ship.bounds.width, 400)
+            Rectangle bounds = new Rectangle(ship.bounds.x, (ship.bounds.height/2 - 220) as int, ship.bounds.width, 440)
             bullets.add(new BulletSprite(bounds, location, type))
             shipfire.play()
         }    
