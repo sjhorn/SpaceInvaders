@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Event
 import org.eclipse.swt.widgets.Listener
 import org.eclipse.swt.widgets.Shell
 
-@CompileStatic
+//@CompileStatic
 class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     Canvas canvas
     Display display
@@ -76,7 +76,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             // Add Earth
             earthSprite = new EarthSprite(bounds)
             
-            Rectangle shipBounds = new Rectangle(bounds.width/2 - 312/2, 0, 312, bounds.height)
+            Rectangle shipBounds = new Rectangle(bounds.width/2 - 312/2 as int, 0, 312, bounds.height)
             ship1Sprite = new Ship1Sprite(shipBounds)
             if(twoPlayer) {
                 ship2Sprite = new Ship2Sprite(shipBounds)
@@ -176,7 +176,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                    break
                    
                case 'x':
-                   for(Sprite invader: invaderGroup.invaders) {
+                   for(InvaderSprite invader: invaderGroup.invaders) {
                        playerOneScoreSprite.score += invader.score
                        invader.explode()
                    }
@@ -408,7 +408,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     void widgetDisposed(DisposeEvent de) {
         InvaderSprite.invaderhit.close()
         BulletSprite.shipfire.close()
-        Ship1Sprite.shiphit.close()
+        ShipSprite.shiphit.close()
         InvaderGroup.invaderSound.close()
         CommandShipSprite.commandshiphit.close()
     }
