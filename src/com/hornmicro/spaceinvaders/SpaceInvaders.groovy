@@ -91,7 +91,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
         
         // Add space invaders
         def vaderOffset = (level % 6) * 22  
-        Rectangle invaderBounds = new Rectangle(bounds.width / 2 - 210, bounds.height/2 - 160 + vaderOffset, 420, 396 - vaderOffset)
+        Rectangle invaderBounds = new Rectangle((bounds.width / 2 - 210) as int, (bounds.height/2 - 160 + vaderOffset) as int, 420, 396 - vaderOffset)
         def vaderSpeed = 700_000_000 - (level % 12) * 45_000_000
         invaderGroup = new InvaderGroup(invaderBounds, vaderSpeed)
         

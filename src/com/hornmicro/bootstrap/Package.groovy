@@ -73,7 +73,7 @@ class Package {
                 "gfx/SpaceInvaders.png",
                 "sounds/invaderhit.wav",
                 "sounds/invaders.wav",
-                "sounds/mothership.wav",
+                "sounds/commandship.wav",
                 "sounds/shipfire.wav",
                 "sounds/shiphit.wav"
             ].each { String fileName ->
