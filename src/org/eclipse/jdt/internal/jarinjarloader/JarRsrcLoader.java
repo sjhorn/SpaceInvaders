@@ -53,13 +53,13 @@ public class JarRsrcLoader {
         }
         ClassLoader jceClassLoader = new URLClassLoader(rsrcUrls, null);
         Thread.currentThread().setContextClassLoader(jceClassLoader);
-        Class c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
+        Class<?> c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
         Method main = c.getMethod(JIJConstants.MAIN_METHOD_NAME, new Class[]{args.getClass()}); 
         main.invoke((Object)null, new Object[]{args});
     }
 
     private static ManifestInfo getManifestInfo() throws IOException {
-        Enumeration resEnum;
+        Enumeration<?> resEnum;
         resEnum = Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME); 
         while (resEnum.hasMoreElements()) {
             try {
@@ -96,7 +96,7 @@ public class JarRsrcLoader {
     private static String[] splitSpaces(String line) {
         if (line == null) 
             return null;
-        List result = new ArrayList();
+        List<String> result = new ArrayList<String>();
         int firstPos = 0;
         while (firstPos < line.length()) {
             int lastPos = line.indexOf(' ', firstPos);
@@ -107,7 +107,7 @@ public class JarRsrcLoader {
             }
             firstPos = lastPos+1; 
         }
-        return (String[]) result.toArray(new String[result.size()]);
+        return result.toArray(new String[result.size()]);
     }
 
 }

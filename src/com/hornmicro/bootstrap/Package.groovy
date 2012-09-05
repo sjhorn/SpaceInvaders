@@ -5,10 +5,6 @@ import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
 
-import com.hornmicro.spaceinvaders.SpaceInvaders
-
-
-
 /*
  * This file packages the classes and jars into a single runnable jar. 
  * The techniques is based on the jar-in-jar code from eclipse jdt ui project
@@ -32,7 +28,7 @@ class Package {
             mainAttributes.putValue(Attributes.Name.MANIFEST_VERSION as String, "1.0")
             [
                 'Manifest-Version' : "1.0",
-                (SWTBootstrap.MAIN_CLASS) : SpaceInvaders.class.name, 
+                (SWTBootstrap.MAIN_CLASS) : "com.hornmicro.spaceinvaders.SpaceInvaders", 
                 (SWTBootstrap.SWT_VERSION) : "3.7.1", 
                 'Main-Class' : SWTBootstrap.class.name
             ].each { k,v -> 

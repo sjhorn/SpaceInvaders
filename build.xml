@@ -7,7 +7,6 @@
     <path id="SpaceInvaders.classpath">
         <pathelement location="bin"/>
     	<pathelement location="libs/groovy/groovy-all-2.0.0.jar"/>
-        <pathelement location="libs/swt/swt-osx-64-3.7.1.jar"/>
     </path>
     <taskdef name="groovyc"
          classname="org.codehaus.groovy.ant.Groovyc"
@@ -24,13 +23,16 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
+    	<delete dir="dist"/>
     </target>
     <target depends="clean" name="cleanall"/>
     <target depends="init" name="build">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <groovyc srcdir="src" destdir="bin">
             <classpath refid="SpaceInvaders.classpath"/>
-            <javac debug="true" debuglevel="${debuglevel}" source="${source}" target="${target}"/>
+            <javac debug="true" debuglevel="${debuglevel}" source="${source}" target="${target}">
+            	<compilerarg value="-Xlint"/>
+            </javac>
         </groovyc>
     </target>
     <target depends="build" name="package">
@@ -39,10 +41,9 @@
             <classpath refid="SpaceInvaders.classpath"/>
         </java>
     </target>
-    <target depends="build" name="run">
-        <java classname="com.hornmicro.spaceinvaders.SpaceInvaders" failonerror="true" fork="yes">
+    <target depends="package" name="run">
+        <java jar="dist/SpaceInvaders.jar" failonerror="true" fork="yes">
             <jvmarg line="-XstartOnFirstThread"/>
-            <classpath refid="SpaceInvaders.classpath"/>
         </java>
     </target>
 </project>
