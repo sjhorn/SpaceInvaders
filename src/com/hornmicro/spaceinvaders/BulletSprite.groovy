@@ -17,7 +17,7 @@ class BulletSprite extends Sprite {
     BulletSprite(Rectangle bounds, DoubleRectangle location, TYPE type) {
         super(new Rectangle(96, 39, 3, 16), bounds, location)
         this.type = type
-        this.speedY = (type == TYPE.SHIP1 || type == TYPE.SHIP2) ? -200d : 200d
+        this.speedY = (type == TYPE.SHIP1 || type == TYPE.SHIP2) ? -300d : 200d
     }
     
     static void fireFromInvader(Sprite invader) {

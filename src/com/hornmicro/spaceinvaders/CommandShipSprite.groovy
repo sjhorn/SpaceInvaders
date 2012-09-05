@@ -23,7 +23,7 @@ class CommandShipSprite extends ScoringSprite {
         this.bounds = new Rectangle(bounds.x - 20, bounds.y, bounds.width + 40, bounds.height) 
         this.location = new DoubleRectangle(bounds.x, bounds.y, 30, 20)
         this.location.left = choice ? bounds.x - 20 : bounds.x + bounds.width
-        this.speedX = choice ? 100d : -100d
+        this.speedX = choice ? 70d : -70d
         this.score = 200
     }
     

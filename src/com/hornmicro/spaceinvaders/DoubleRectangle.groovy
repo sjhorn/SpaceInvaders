@@ -32,6 +32,14 @@ class DoubleRectangle {
         return false
     }
     
+    boolean contains(double x, double y) {
+        if(x >= left && x <= right && y >= top && y <= bottom) {
+            return true
+        }
+        return false
+    }
+    
+    
     void setLeft(double left) {
         this.left = left
         if(this.width) this.right = left + this.width
@@ -64,5 +72,9 @@ class DoubleRectangle {
     
     String toString() {
         return "$left, $top, $right, $bottom"
+    }
+    
+    Rectangle asRectangle() {
+        return new Rectangle(left as int, top as int, width as int, height as int)
     }
 }

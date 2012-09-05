@@ -26,9 +26,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     Display display
     Shell shell
     Image spriteSheet
-    BaseSprite baseSprite1
-    BaseSprite baseSprite2
-    BaseSprite baseSprite3
+    ShieldSprite shieldSprite1
+    ShieldSprite shieldSprite2
+    ShieldSprite shieldSprite3
     Ship1Sprite ship1Sprite
     Ship2Sprite ship2Sprite
     EarthSprite earthSprite
@@ -85,14 +85,14 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
 
         // Add bases
         def baseY = bounds.height/2 + 110
-        baseSprite1 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 130, baseY, 31,36))
-        baseSprite2 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 - 15, baseY, 31,36))
-        baseSprite3 = new BaseSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100, baseY, 31,36))
+        shieldSprite1 = new ShieldSprite(bounds, new DoubleRectangle(bounds.width / 2 - 130, baseY, 31,36))
+        shieldSprite2 = new ShieldSprite(bounds, new DoubleRectangle(bounds.width / 2 - 15, baseY, 31,36))
+        shieldSprite3 = new ShieldSprite(bounds, new DoubleRectangle(bounds.width / 2 + 100, baseY, 31,36))
         
         // Add space invaders
         def vaderOffset = (level % 6) * 22  
         Rectangle invaderBounds = new Rectangle((bounds.width / 2 - 210) as int, (bounds.height/2 - 160 + vaderOffset) as int, 420, 396 - vaderOffset)
-        def vaderSpeed = 700_000_000 - (level % 12) * 45_000_000
+        def vaderSpeed = 700_000_000 - (level % 6) * 25_000_000
         invaderGroup = new InvaderGroup(invaderBounds, vaderSpeed)
         
         BulletSprite.bullets.clear()
@@ -223,15 +223,15 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
             earthSprite.draw(spriteSheet, gc)
             
             // Hide bases when the invaders reach them
-            if(invaderGroup.location.bottom >= baseSprite1.location.top) {
-                baseSprite1.hide()
-                baseSprite2.hide()
-                baseSprite3.hide()
+            if(invaderGroup.location.bottom >= shieldSprite1.location.top) {
+                shieldSprite1.hide()
+                shieldSprite2.hide()
+                shieldSprite3.hide()
             }
             
-            baseSprite1.draw(spriteSheet, gc)
-            baseSprite2.draw(spriteSheet, gc)
-            baseSprite3.draw(spriteSheet, gc)
+            shieldSprite1.draw(spriteSheet, gc)
+            shieldSprite2.draw(spriteSheet, gc)
+            shieldSprite3.draw(spriteSheet, gc)
             invaderGroup.draw(spriteSheet, gc)
             if(commandShipSprite && !commandShipSprite.isHidden()) {
                 commandShipSprite.draw(spriteSheet, gc)
@@ -314,7 +314,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     
                     // Command Ship
                     commandShipTime += timePassed
-                    if(commandShipTime > 10_000_000_000) {
+                    if(commandShipTime > 18_000_000_000) {
                         commandShipTime = 0
                         if(!commandShipSprite || commandShipSprite.isHidden()) {
                             commandShipSprite = new CommandShipSprite(bounds)
@@ -325,7 +325,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                     BulletSprite.moveAll(timePassed)
                     
                     // Detect collisions
-                    List sprites = [ invaderGroup.invaders, baseSprite1, baseSprite2, baseSprite3 ]
+                    List sprites = [ invaderGroup.invaders, shieldSprite1, shieldSprite2, shieldSprite3 ]
                     
                     if(ship1Sprite.lives > 0) {
                         sprites.add(ship1Sprite)
