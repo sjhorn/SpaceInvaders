@@ -4,7 +4,11 @@
 
 ## Download:
 
-<https://github.com/downloads/sjhorn/SpaceInvaders/SpaceInvaders.jar>
+### Cross platform jar
+<https://github.com/downloads/sjhorn/SpaceInvaders/SpaceInvaders_1.0.jar>
+
+### Mac OSX Application Bundle
+<https://github.com/downloads/sjhorn/SpaceInvaders/SpaceInvaders_1.0.dmg>
 
 ## Run
 
