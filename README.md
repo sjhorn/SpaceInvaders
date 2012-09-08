@@ -12,9 +12,18 @@
 
 ## Run
 
+
+### For the cross platform jar
 ````
 java -XstartOnFirstThread -jar SpaceInvaders.jar
 ````
+
+### For Mac OSX Application Bundle
+```
+Download the dmg file above.
+Double click to mount the dmg
+Drag the SpaceInvaders icon into the Application Folder
+```
 
 ## Keys
 
