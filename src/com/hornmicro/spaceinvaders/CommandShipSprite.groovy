@@ -4,7 +4,7 @@ import org.eclipse.swt.graphics.Rectangle;
 
 class CommandShipSprite extends ScoringSprite {
     static final long EXPLODING_TIME = 1_200_000_000
-    static final Sound commandshiphit = new Sound("invaderhit.wav")
+    static final Sound commandshiphit = new Sound("commandshiphit.wav")
     static final Sound commandshipmove = new Sound("commandship.wav")
     
     

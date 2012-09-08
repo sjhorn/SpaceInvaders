@@ -127,10 +127,6 @@ class InvaderGroup {
     }
     
     void draw(Image spriteSheet, GC gc) {
-//        gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED))
-//        gc.drawRectangle(bounds)
-//        gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLUE))
-//        gc.drawRectangle(location.getRectangle())
         invaders.each { InvaderSprite sprite ->
             sprite.draw(spriteSheet, gc)
         }

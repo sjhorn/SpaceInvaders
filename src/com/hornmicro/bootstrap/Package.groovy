@@ -70,6 +70,7 @@ class Package {
                 "sounds/invaderhit.wav",
                 "sounds/invaders.wav",
                 "sounds/commandship.wav",
+                "sounds/commandshiphit.wav",
                 "sounds/shipfire.wav",
                 "sounds/shiphit.wav"
             ].each { String fileName ->
