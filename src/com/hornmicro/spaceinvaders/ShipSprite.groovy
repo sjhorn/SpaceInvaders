@@ -19,6 +19,7 @@ abstract class ShipSprite extends Sprite {
     long startingTime = STARTING_TIME
     long explodingTime = 0
     
+    int livesOffset = 20
     int lives = 3
     List<Rectangle> lifeRectangles
     
@@ -40,7 +41,7 @@ abstract class ShipSprite extends Sprite {
             Rectangle l = lifeRectangles[lives]
             gc.drawImage(spriteSheet,
                 l.x, l.y, l.width, l.height,
-                (bounds.x+ bounds.width/2 + 20) as int, location.top as int, 42, 20)
+                (bounds.x+ bounds.width/2 + livesOffset) as int, location.top as int, 42, 20)
             super.draw(spriteSheet, gc)
         } else if (lives > 0) {
             super.draw(spriteSheet, gc)

@@ -24,6 +24,8 @@ class Ship2Sprite extends ShipSprite {
             new Rectangle(43, 120, 42, 20),
             new Rectangle(0, 120, 42, 20)
         ]
+        
+        
     }
     
     void positionShip() {

@@ -82,6 +82,7 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
                 ship2Sprite = new Ship2Sprite(shipBounds)
             }
         }
+        shell.text = "Level ${level} - ${twoPlayer ? 'Two Player' : 'One Player'}"
 
         // Add bases
         def baseY = bounds.height/2 + 110

@@ -24,6 +24,8 @@ class Ship1Sprite extends ShipSprite {
             new Rectangle(43, 120, 42, 20),
             new Rectangle(0, 120, 42, 20)
         ]
+        
+        livesOffset = -62
     }
     
     void positionShip() {
