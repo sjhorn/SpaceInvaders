@@ -417,6 +417,9 @@ class SpaceInvaders implements PaintListener, DisposeListener, Listener {
     
     static main(args) {
         try {
+            if(args?.find{ it == '-nosound'}) {
+                System.setProperty("nosound", "true")
+            }
             SpaceInvaders spaceInvaders = new SpaceInvaders()
             if(args?.find{it == '-a' }) {
                 spaceInvaders.aIEnabled = true

@@ -21,25 +21,27 @@ class Sound implements LineListener {
     Clip clip
     
     Sound(String sound) {
-        InputStream soundInputStream = getClass().getResourceAsStream(sound)
-        if(soundInputStream == null) {
-            File audio1 = new File("sounds/${sound}")
-            URL url = audio1.toURI().toURL()
-            soundInputStream = url.openStream()
+        if(!System.properties.nosound) {
+            InputStream soundInputStream = getClass().getResourceAsStream(sound)
+            if(soundInputStream == null) {
+                File audio1 = new File("sounds/${sound}")
+                URL url = audio1.toURI().toURL()
+                soundInputStream = url.openStream()
+            }
+            
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(loadStream(soundInputStream))
+            AudioFormat af = audioInputStream.getFormat()
+            int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength())
+            
+            DataLine.Info info = new DataLine.Info(Clip.class, af, size)
+            
+            byte[] audio = new byte[size]
+            audioInputStream.read(audio, 0, size)
+            
+            this.clip = (Clip) AudioSystem.getLine(info)
+            clip.open(af, audio, 0, size)
+            clip.addLineListener(this)
         }
-        
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(loadStream(soundInputStream))
-        AudioFormat af = audioInputStream.getFormat()
-        int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength())
-        
-        DataLine.Info info = new DataLine.Info(Clip.class, af, size)
-        
-        byte[] audio = new byte[size]
-        audioInputStream.read(audio, 0, size)
-        
-        this.clip = (Clip) AudioSystem.getLine(info)
-        clip.open(af, audio, 0, size)
-        clip.addLineListener(this)
     }
     
     void update(LineEvent le) {
@@ -52,20 +54,26 @@ class Sound implements LineListener {
     }
     
     void stop() {
-        clip.stop()
+        if(!System.properties.nosound) {
+            clip.stop()
+        }
     }
     
     void close() {
-        clip.drain()
-        clip.close()
+        if(!System.properties.nosound) {
+            clip.drain()
+            clip.close()
+        }
     }
     
     void play() {
-        if(clip.isRunning()) {
-            clip.stop()
+        if(!System.properties.nosound) {
+            if(clip.isRunning()) {
+                clip.stop()
+            }
+            clip.setMicrosecondPosition(0)
+            clip.start()
         }
-        clip.setMicrosecondPosition(0)
-        clip.start()
     }
     
     void loop() {
