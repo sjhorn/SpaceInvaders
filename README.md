@@ -8,7 +8,7 @@
 <https://github.com/downloads/sjhorn/SpaceInvaders/SpaceInvaders_1.0.jar>
 
 ### Mac OSX Application Bundle
-<https://github.com/downloads/sjhorn/SpaceInvaders/SpaceInvaders_1.0.dmg>
+<https://github.com/sjhorn/SpaceInvaders/releases/download/1.1/SpaceInvaders_1.1.dmg>
 
 ## Run
 
